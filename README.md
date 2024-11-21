@@ -3,6 +3,12 @@
 **by [Yuxiang Ji*](https://yux1angji.github.io/), Boyong He\*, [Chenyuan Qu](https://chenyuanqu.com/), Zhuoyue Tan, Chuan Qin, Liaoni Wu**
 
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/diffusion-features-to-bridge-domain-gap-for/domain-generalization-on-gta5-to-cityscapes)](https://paperswithcode.com/sota/domain-generalization-on-gta5-to-cityscapes?p=diffusion-features-to-bridge-domain-gap-for)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/diffusion-features-to-bridge-domain-gap-for/domain-generalization-on-gta-to-avg)](https://paperswithcode.com/sota/domain-generalization-on-gta-to-avg?p=diffusion-features-to-bridge-domain-gap-for)
+
+This is the official repository for the paper ["Diffusion Features to Bridge Domain Gap for Semantic Segmentation"](https://arxiv.org/abs/2406.00777)
+
+
 ## Overview
 
 Pre-trained diffusion models have demonstrated remarkable proficiency in synthesizing images across a wide range of scenarios with customizable prompts, indicating their effective capacity to capture universal features. 
@@ -16,8 +22,6 @@ the previous state-of-the-art performance by 2.7 mIoU for GTA→Cityscapes,
 by 4.98 mIoU for GTA→ACDC, by 11.69 mIoU for GTA→Dark Zurich.
 
 ![intro](resources/pipeline.jpg)
-
-[[arXiv]](https://arxiv.org/abs/2406.00777)
 
 
 ## Setup Environment
