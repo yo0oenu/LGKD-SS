@@ -5,7 +5,7 @@
 
 # dataset settings
 dataset_type = 'CityscapesDataset'
-data_root = 'data/cityscapes/'
+data_root = '/home/yeonwoo3/DATA/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 crop_size = (512, 512)
@@ -43,19 +43,19 @@ data = dict(
     workers_per_gpu=4,
     train=dict(
         type='GTADataset',
-        data_root='data/gta/',
+        data_root='/home/yeonwoo3/DATA/gta/',
         img_dir='images',
         ann_dir='labels',
         pipeline=train_pipeline),
     val=dict(
         type='CityscapesDataset',
-        data_root='data/cityscapes/',
+        data_root='/home/yeonwoo3/DATA/cityscapes/',
         img_dir='leftImg8bit/val',
         ann_dir='gtFine/val',
         pipeline=test_pipeline),
     test=dict(
         type='CityscapesDataset',
-        data_root='data/cityscapes/',
+        data_root='/home/yeonwoo3/DATA/cityscapes/',
         img_dir='leftImg8bit/val',
         ann_dir='gtFine/val',
         pipeline=test_pipeline))

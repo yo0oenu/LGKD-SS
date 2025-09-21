@@ -11,7 +11,7 @@ import torch.distributed as dist
 from mmcv.runner import BaseModule, auto_fp16
 
 
-class BaseSegmentor(BaseModule, metaclass=ABCMeta):
+class BaseSegmentor(BaseModule, metaclass=ABCMeta):   #추상 클래스
     """Base class for segmentors."""
 
     def __init__(self, init_cfg=None):
@@ -30,17 +30,18 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
                        'auxiliary_head') and self.auxiliary_head is not None
 
     @property
-    def with_decode_head(self):
+    def with_decode_head(self):   #decode head 백본에서 추출된 피처를 최종 segmentation map 변환
         """bool: whether the segmentor has decode head"""
         return hasattr(self, 'decode_head') and self.decode_head is not None
 
+#-------추상 메소드: 자식 클래스에서 반드시 구현------
     @abstractmethod
-    def extract_feat(self, imgs):
+    def extract_feat(self, imgs):  #백본
         """Placeholder for extract features from images."""
         pass
 
     @abstractmethod
-    def encode_decode(self, img, img_metas):
+    def encode_decode(self, img, img_metas):   #inferance
         """Placeholder for encode images with backbone and decode into a
         semantic segmentation map of the same size as input."""
         pass
@@ -60,7 +61,7 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
         """Placeholder for augmentation test."""
         pass
 
-    def forward_test(self, imgs, img_metas, **kwargs):
+    def forward_test(self, imgs, img_metas, **kwargs):   
         """
         Args:
             imgs (List[Tensor]): the outer list indicates test-time
@@ -70,12 +71,12 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
                 augs (multiscale, flip, etc.) and the inner list indicates
                 images in a batch.
         """
-        for var, name in [(imgs, 'imgs'), (img_metas, 'img_metas')]:
+        for var, name in [(imgs, 'imgs'), (img_metas, 'img_metas')]:  #입력 타입이 list가 맞는지
             if not isinstance(var, list):
                 raise TypeError(f'{name} must be a list, but got '
                                 f'{type(var)}')
 
-        num_augs = len(imgs)
+        num_augs = len(imgs)  #augmentation 개수
         if num_augs != len(img_metas):
             raise ValueError(f'num of augmentations ({len(imgs)}) != '
                              f'num of image meta ({len(img_metas)})')
@@ -89,7 +90,7 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
             pad_shapes = [_['pad_shape'] for _ in img_meta]
             assert all(shape == pad_shapes[0] for shape in pad_shapes)
 
-        if num_augs == 1:
+        if num_augs == 1:  #augx -> simple test
             return self.simple_test(imgs[0], img_metas[0], **kwargs)
         else:
             return self.aug_test(imgs, img_metas, **kwargs)
@@ -105,7 +106,7 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
         should be double nested (i.e.  List[Tensor], List[List[dict]]), with
         the outer list indicating test time augmentations.
         """
-        if return_loss:
+        if return_loss:  #학습 모드 -> forward_train 호출
             return self.forward_train(img, img_metas, **kwargs)
         else:
             return self.forward_test(img, img_metas, **kwargs)

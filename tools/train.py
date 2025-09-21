@@ -142,14 +142,36 @@ def main(args):
 
     model = build_train_model(
         cfg, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-    model.init_weights()
+    
+    # Teacher 체크포인트 로드 (KD 전용)
+    if hasattr(cfg, 'teacher_checkpoint') and cfg.teacher_checkpoint:
+        logger.info(f'Loading teacher checkpoint from {cfg.teacher_checkpoint}')
+        try:
+            if hasattr(model, 'teacher') and model.teacher is not None:
+                checkpoint = torch.load(cfg.teacher_checkpoint, map_location='cpu')
+                if 'state_dict' in checkpoint:
+                    state_dict = checkpoint['state_dict']
+                elif 'model' in checkpoint:
+                    state_dict = checkpoint['model']
+                else:
+                    state_dict = checkpoint
+                missing_keys, unexpected_keys = model.teacher.load_state_dict(state_dict, strict=False)
+                logger.info('Successfully loaded teacher checkpoint')
+            else:
+                logger.warning('No teacher model found, skipping teacher checkpoint loading')
+                missing_keys, unexpected_keys = [], []
+        except Exception as e:
+            logger.error(f'Failed to load teacher checkpoint: {e}')
+            logger.info('Continuing without teacher checkpoint...')
+    else:
+        logger.info('No teacher checkpoint provided')
 
     logger.info(model)
-
     datasets = [build_dataset(cfg.data.train)]
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
-        val_dataset.pipeline = cfg.data.train.pipeline
+        #val_dataset.pipeline = cfg.data.train.pipeline
+        val_dataset.pipeline = cfg.data.test.pipeline
         datasets.append(build_dataset(val_dataset))
     if cfg.checkpoint_config is not None:
         # save mmseg version, config file content and class names in

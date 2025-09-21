@@ -10,7 +10,9 @@ projection_dim: [2048, 2048, 1024, 512]
 projection_dim_x4: 256
 
 # Change for your sdv2-1 repo
-model_id: "/home/xmuairmud/jyx/stable-diffusion-2-1"
+model_id: "/home/yeonwoo3/model/stable_diffusion_512/"  
+# Unet finetuned path
+unet_ckpt_pth: "/home/yeonwoo3/model/stable_diffusion_512/unet"
 
 # As default
 aggregation_type: "direct_aggregation"
@@ -21,17 +23,18 @@ do_mask_steps: True
 do_one_step: False
 
 # As default
-guidance_scale: 5.0
-eta: 1.0
-input_resolution: [512, 512] # H, W
-prompt: ""
+guidance_scale: 7.5
+eta: 0.0
+#input_resolution: [512, 512] # H, W
+input_resolution: [384, 384]
+prompt: ""   #기본 프롬프트
 negative_prompt: ""
 
 # As default for 37 steps
 # Subsample every 5 steps
 # You could also change it for fewer steps for accelerating
 scheduler_timesteps: [160, 139, 121, 105, 91, 80, 69, 60, 52, 45, 40, 34, 30, 26, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-save_timestep: [33, 29, 25, 22, 18, 14, 11, 7, 3]
+save_timestep: [33, 29, 25, 22, 18, 14, 11, 7, 3]  #33
 num_timesteps: 37
 
 # scheduler_timesteps: [100]
@@ -54,25 +57,44 @@ idxs_resnet: [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2
 idxs_ca: [[1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2], [3, 0], [3, 1], [3, 2]]
 # idxs_ca: []
 
-# Category prompt for path-controlled diffusion
-### GTA
-label_map: 
-  # 0: 'A high quality photo; europe city; road, All types of roads, including lanes for vehicles'
-  1: 'A high quality photo; europe city; sidewalk, Paths for pedestrian use'
-  # 2: 'A high quality photo; europe city; building, Includes houses, shops, skyscrapers, and other types of buildings'
-  3: 'A high quality photo; europe city; wall, Outer walls of buildings or structures'
-  # 4: 'A high quality photo; europe city; fence, Structures used for enclosures, like metal fences, wooden fences'
-  # 5: 'A high quality photo; europe city; pole, Slender structures such as lamp posts, utility poles'
-  # 6: 'A high quality photo; europe city; traffic light, Lights used to control traffic flow'
-  # 7: 'A high quality photo; europe city; traffic sign, Signs indicating traffic rules, such as stop signs, speed limits'
-  # 8: 'A high quality photo; europe city; vegetation, Natural plants like trees, grass, bushes'
-  # 9: 'A high quality photo; europe city; terrain, Natural landforms like rocks, hills'
-  # 10: 'A high quality photo; europe city; sky, The part of the image representing the sky'
-  # 11: 'A high quality photo; europe city; person, Pedestrians, cyclists'
-  12: 'A high quality photo; europe city; rider, People riding bicycles, motorcycles'
-  # 13: 'A high quality photo; europe city; car, All types of four-wheeled vehicles, including sedans, trucks, buses'
-  14: 'A high quality photo; europe city; truck, Larger vehicles used for cargo transport'
-  # 15: 'A high quality photo; europe city; bus, Public transport vehicles'
-  16: 'A high quality photo; europe city; train, Vehicles on railway tracks'
-  # 17: 'A high quality photo; europe city; motorcycle, Includes motorcycles and scooters'
-  # 18: 'A high quality photo; europe city; bicycle, Includes all types of bicycles'
+ #camvid label
+label_map:
+  0: 'Building'
+  1: 'Bicyclist'
+  2: 'Fence'
+  3: 'Pole'
+  4: 'Pedestrian'
+  5: 'Road'
+  6: 'Sky'
+  7: 'SignSymbol'
+  8: 'Tree'
+  9: 'Sidewalk'
+  10: 'Car'
+
+#camvid sentence
+#label_map:
+#  0: 'A tall structure made of concrete and glass that houses offices and apartments. '
+#  1: 'A person wearing a helmet riding a bicycle on the street.'
+#  2: 'A wooden or metal barrier that encloses a yard or property.'
+#  3: 'A vertical post used to support electrical wires or street lamps.'
+#  4: 'A person walking on the sidewalk or crossing the street.'
+#  5: 'A paved surface for vehicles to drive on, often marked with lanes.'
+#  6: 'The area above the earth, usually blue during the day with clouds.'
+#  7: 'A traffic sign or symbol used to guide or warn drivers and pedestrians.'
+#  8: 'A tall plant with a trunk, branches, and leaves providing shade.'
+#  9: 'A paved path beside the road for people to walk safely.'
+#  10: 'A motor vehicle with four wheels used for transportation.'
+
+#camvid bag of words
+#label_map:
+#  0: 'Building', 'Architecture', 'Facade', 'Structure', 'Windows'
+#  1: 'Bicyclist', 'Helmet', 'Pedals', 'Wheels', 'Cycling'
+#  2: Fence, Boundary, Pickets, Barrier, Perimeter
+#  3: Pole, Slender, Vertical, Cable, Metallic
+#  4: Pedestrian, Crosswalk, Footsteps, Walker, Striding
+#  5: Road, Asphalt, Lane, Driveway, Trafficwa
+#  6: Sky, Atmosphere, Horizon, Clouds, Airspace
+#  7: SignSymbol, Traffic sign, Pictogram, Instruction, Regulation
+#  8: Tree, Foliage, Trunk, Branches, Canopy
+#  9: Sidewalk, Curb, Walkway, Pedway, Paving
+#  10: Car, Vehicle, Windshield, Engine, Parking

@@ -9,14 +9,17 @@ from torch import nn
 import torch.nn.init as init
 from archs.detectron2.resnet import ResNet, BottleneckBlock
 
-
+'''
+여러 resolution의 feature map을 입력받아, 각 스트라이드별로 여러 timestep feature를 normalization, 
+가중치 적용 후, 합쳐서 최종 stride 별 출력을 만듦
+'''
 class StrideVanillaNetwork(nn.Module):
     def __init__(
             self, 
-            feature_dims, 
+            feature_dims,   #feature의 dimension 크기 (각 feature의 채널 수 리스트)
             device,
-            idxs,
-            save_timestep=[],
+            idxs,     #각 feature의 index
+            save_timestep=[],  #고려할 timestep 리스트
             num_timesteps=None,
             timestep_weight_sharing=False
         ):
@@ -25,11 +28,11 @@ class StrideVanillaNetwork(nn.Module):
         self.device = device
         self.save_timestep = save_timestep
 
-        # Count features for each stride, stride id [0, 1, 2]
-        self.num_stride = 4
-        self.feature_cnts = [0 for _ in range(self.num_stride)]
-        self.feature_stride_idx = []
-        self.feature_instride_num = []
+        # Count features for each stride, stride id [0, 1, 2] /idx[i][j] -> i: 몇번째 stride? j: 몇번째 feature?
+        self.num_stride = 4  
+        self.feature_cnts = [0 for _ in range(self.num_stride)] #4개의 각 스트라이드에 해당하는 피처가 총 몇개인지 카운트
+        self.feature_stride_idx = []    #i번째 피처가 몇 번째 스트라이드에 속하는지
+        self.feature_instride_num = []   #i번째 피처가 해당 스트라이드 내에서 몇 번째 피처인지
         for i in range(len(idxs)):
             self.feature_stride_idx.append(idxs[i][0])
             self.feature_instride_num.append(self.feature_cnts[idxs[i][0]])
@@ -39,16 +42,18 @@ class StrideVanillaNetwork(nn.Module):
         
         mixing_weights = [torch.ones(self.feature_cnts[i] * len(save_timestep)) * 0.01 for i in range(self.num_stride)]
         self.mixing_weights_stride = nn.ParameterList([nn.Parameter(mixing_weights[i].to(device)) for i in range(self.num_stride)])
-
+        '''
+        각 스트라이드마다, 그 스트라이드에 속한(피처 개수 * 시간대 개수) 만큼의 길이를 갖는 1차원 백터 생성.
+        해당 벡터의 각 요소가 개별 피처의 하나하나의 중요도를 나타냄(weight) (초기엔 0.01)
+        '''
         self.in_stride = nn.ParameterList([nn.InstanceNorm2d(feature_dims[i], affine=True) for i in range(len(feature_dims))])
 
         self.apply(self.weights_init)
 
-    def weights_init(self, m):
-        """
-        初始化网络权重。
-        对于卷积层使用kaiming初始化，对于偏置使用0初始化。
-        """
+    #파라미터 초기화
+      # Conv/ConvTranspose: He + bias = 0
+      # Norm: (1, 0)
+    def weights_init(self, m):   
         if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
             init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             if m.bias is not None:
@@ -64,26 +69,29 @@ class StrideVanillaNetwork(nn.Module):
         Features are formed as (1,0)_timestep0,  (1,0)_timestep1, ..., (1,1)_timestep0, (1,1)_timestep1, ... 
         
         Return four features in stride 8, 16, 32, 64
+        
+        batch_list: 스트라이드 개수만큼의 리스트 ex) [batch_list[0], batch_list[1],...,]
+        각 요소의 shape [B, C, H, W] 이때, C: 해당 스트라이드에 속한 모든 feature * timestep * channel 수
         """
 
-        output_features = [None for _ in range(self.num_stride)]
+        output_features = [None for _ in range(self.num_stride)]  #stride별 feature map 저장
         mixing_weights_stride = [torch.nn.functional.softmax(self.mixing_weights_stride[i], dim=0) for i in range(self.num_stride)]
         # print(mixing_weights_stride[0], mixing_weights_stride[1], mixing_weights_stride[2])
 
-        for idx_i in range(len(self.feature_stride_idx)):
-            for timestep_i in range(len(self.save_timestep)):
-                stride_id = self.feature_stride_idx[idx_i]
-                instride_num = self.feature_instride_num[idx_i]
+        for idx_i in range(len(self.feature_stride_idx)):   
+            for timestep_i in range(len(self.save_timestep)):  
+                stride_id = self.feature_stride_idx[idx_i]   #해당 feature가 속한 stride 인덱스
+                instride_num = self.feature_instride_num[idx_i]  #해당 feature가 stride 내에서 몇 번째인지
 
                 # Chunk the batch according the layer
                 # Account for looping if there are multiple timesteps
-                num_channel = self.feature_dims[idx_i]
+                num_channel = self.feature_dims[idx_i]  #해당 feature의 채널 수
                 start_channel = instride_num * len(self.save_timestep) * num_channel + timestep_i * num_channel
-                feats = batch_list[stride_id][:, start_channel:start_channel+num_channel, :, :]
+                feats = batch_list[stride_id][:, start_channel:start_channel+num_channel, :, :]   #원하는 feature 슬라이싱
+                # -> [B, num_channel, H, W]
+                feats = self.in_stride[idx_i](feats)  #정규화 
 
-                feats = self.in_stride[idx_i](feats)
-
-                feats = mixing_weights_stride[stride_id][timestep_i * self.feature_cnts[stride_id] + instride_num] * feats
+                feats = mixing_weights_stride[stride_id][timestep_i * self.feature_cnts[stride_id] + instride_num] * feats #가중치 곱함
                 if output_features[stride_id] is None:
                     output_features[stride_id] = feats
                 else:
@@ -221,16 +229,17 @@ class StrideDirectAggregationNetwork2(nn.Module):
 
         return output_features[3], output_features[2], output_features[1], output_features[0]
 
-
-
+'''
+U-Net에서 다양한 해상도(stride)와 TimeStep에서 추출된 피처들을 취합, 정제
+'''
 class StrideDirectAggregationNetwork(nn.Module):
     def __init__(
             self, 
-            feature_dims_by_idx,
-            feature_dims_by_stride, 
-            device,
-            idxs,
-            projection_dim=[768, 384, 192, 96],  ## Stride 64, 32, 16, 8
+            feature_dims_by_idx,   #각 레이어 인덱스별 채널 수
+            feature_dims_by_stride,   #각 stride별 채널 수
+            device,   
+            idxs,  #feature을 추출한 레이어의 인덱스 목록
+            projection_dim=[768, 384, 192, 96],  # Stride 64, 32, 16, 8
             num_norm_groups=16,
             num_res_blocks=1,
             save_timestep=[],
@@ -238,24 +247,24 @@ class StrideDirectAggregationNetwork(nn.Module):
             timestep_weight_sharing=False
         ):
         super().__init__()
-        self.bottleneck_layers = nn.ModuleList()
+        self.bottleneck_layers = nn.ModuleList()  
         self.feature_dims_by_stride = feature_dims_by_stride
-        # For CLIP symmetric cross entropy loss during training
+        # For CLIP symmetric cross entropy loss during training(CLIP 손실 함수 계산에 사용되는 파라미터)
         self.logit_scale = torch.ones([]) * np.log(1 / 0.07)
         self.device = device
         self.save_timestep = save_timestep
 
         # Count features for each stride, stride id [0, 1, 2]
-        self.num_stride = len(projection_dim)
-        self.feature_cnts = [0 for _ in range(self.num_stride)]
-        self.feature_stride_idx = []
-        self.feature_instride_num = []
-        for i in range(len(idxs)):
-            self.feature_stride_idx.append(idxs[i][0])
-            self.feature_instride_num.append(self.feature_cnts[idxs[i][0]])
-            self.feature_cnts[idxs[i][0]] += 1
+        self.num_stride = len(projection_dim)   #총 stride 수
+        self.feature_cnts = [0 for _ in range(self.num_stride)]  
+        self.feature_stride_idx = []  #스트라이드 인덱스
+        self.feature_instride_num = []   #스트라이드 내에서의 순번 저장
+        for i in range(len(idxs)):   #모든 피처에 대해 루프를 돌면서 스트라이드별 피처 개수를 계산
+            self.feature_stride_idx.append(idxs[i][0])   #현재 피처의 스트라이드 인덱스 저장
+            self.feature_instride_num.append(self.feature_cnts[idxs[i][0]])  #현재 피처가 해당 스트라이드 내에서 몇 번째 feature인지 저장
+            self.feature_cnts[idxs[i][0]] += 1  #해당 스트라이드의 피처 개수 1 증가
 
-        for stride_id in range(self.num_stride):
+        for stride_id in range(self.num_stride):  #각 스트라이드 레벨에 대해 resnet bottle neck 레이어 생성
             # print(stride_id, feature_dims[stride_id * 3] * 3 * len(save_timestep), projection_dim[stride_id])
             bottleneck_layer = nn.Sequential(
                 *ResNet.make_stage(
@@ -275,10 +284,6 @@ class StrideDirectAggregationNetwork(nn.Module):
         self.apply(self.weights_init)
 
     def weights_init(self, m):
-        """
-        初始化网络权重。
-        对于卷积层使用kaiming初始化，对于偏置使用0初始化。
-        """
         if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
             init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             if m.bias is not None:
@@ -287,7 +292,7 @@ class StrideDirectAggregationNetwork(nn.Module):
             init.constant_(m.weight, 1)
             init.constant_(m.bias, 0)
 
-    def forward(self, batch_list):
+    def forward(self, batch_list):   #batchlist: 각 스트라이드 별로, 모든 타임스텝의 피처들이 채널 방향으로 concat 된 텐서
         """
         Assumes batch is a list of shape (B, C, H, W) where C is the concatentation of all timesteps features for each layer.
 
@@ -296,8 +301,8 @@ class StrideDirectAggregationNetwork(nn.Module):
         Return four features in stride 8, 16, 32, 64
         """
 
-        output_features = [None for _ in range(self.num_stride)]
-        for stride_id in range(self.num_stride):
+        output_features = [None for _ in range(self.num_stride)]  #각 스트라이드 별 출력 피처를 저장할 list 초기화
+        for stride_id in range(self.num_stride): #각 스트라이드 레벨 별로 loop
             # print(stride_id, batch_list[stride_id].shape)
             feats = batch_list[stride_id]
             if feats == None:

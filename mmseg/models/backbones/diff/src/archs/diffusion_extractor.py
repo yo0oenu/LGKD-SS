@@ -23,21 +23,21 @@ class DiffusionExtractor(nn.Module):
     """
     Module for running either the generation or inversion process 
     and extracting intermediate feature maps.
+    init 인자 unet 추가, init_models(unet = unet 추가)
     """
-    def __init__(self, config, device):
+    def __init__(self, config, device, unet):
         super().__init__()
         self.device = device
+        #pip: diffusion 전체 파이프라인 / unet / vae(이미지) / clip_tokenizer (텍스트 인코딩)
+        self.pipe, self.unet, self.vae, self.clip, self.clip_tokenizer = init_models(unet = unet, model_id=config["model_id"])
+        self.scheduler = self.pipe.scheduler  #DDIM 스케줄러
 
-        self.pipe, self.unet, self.vae, self.clip, self.clip_tokenizer = init_models(model_id=config["model_id"])
-
-        self.scheduler = self.pipe.scheduler
-
-        self.num_timesteps = config["num_timesteps"]
+        self.num_timesteps = config["num_timesteps"]    #37
         self.scheduler.set_timesteps(self.num_timesteps)
-        self.scheduler.timesteps = torch.Tensor(config["scheduler_timesteps"])
+        self.scheduler.timesteps = torch.Tensor(config["scheduler_timesteps"])  
         self.generator = torch.Generator(self.device).manual_seed(config.get("seed", 0))
 
-        self.prompt = config.get("prompt", "")
+        self.prompt = config.get("prompt", "")  
         self.negative_prompt = config.get("negative_prompt", "")
         
         self.batch_size = 2
@@ -51,20 +51,23 @@ class DiffusionExtractor(nn.Module):
         print(f"diffusion_extractor diffusion_mode: {self.diffusion_mode}")
         self.diffusion_version = config.get("model_id")
         print(f"diffusion_extractor diffusion version: {self.diffusion_version}")
-
+        
+        # idxs_resnet: U-Net의 내부에서 어느 곳에서 feature를 추출할지
         if "idxs_resnet" in config and config["idxs_resnet"] is not None:
-            self.idxs_resnet = config["idxs_resnet"]
+            self.idxs_resnet = config["idxs_resnet"]   
         else:
             self.idxs_resnet = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2), (3, 0), (3, 1), (3, 2)]
         
+        #idxs_ca: Cross-Attention 레이어에서 feature map 추출 위치 지정
         if "idxs_ca" in config and config["idxs_ca"] is not None:
-            self.idxs_ca = config["idxs_ca"]
+            self.idxs_ca = config["idxs_ca"]   #Cross-Attention 블록 중 어느 곳에서 attention map을 추출할지
         else:
             self.idxs_ca = [(1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2), (3, 0), (3, 1), (3, 2)]
 
         print(f"diffusion extractor idxs_resnet={self.idxs_resnet}")
         print(f"diffusion extractor idxs_ca={self.idxs_ca}")
 
+        #latent 해상도: input image의 1/8로 줄인값
         self.output_resolution = (config["input_resolution"][0]//8, config["input_resolution"][1]//8)
 
         print(f"diffusion extractor len(timesteps)={self.scheduler.timesteps.shape}")
@@ -73,14 +76,15 @@ class DiffusionExtractor(nn.Module):
         # Note that save_timestep is in terms of number of generation steps
         # save_timestep = 0 is noise, save_timestep = T is a clean image
         # generation saves as [0...T], inversion saves as [T...0]
-        self.save_timestep = config.get("save_timestep", [])
+        #몇 번째 step들에서 feature를 저장할지(list로 저장)
+        self.save_timestep = config.get("save_timestep", [])   
         print(f"diffusion extractor save_timestep: {self.save_timestep}")
 
-        self.s_tmin = config.get("s_tmin")
-        self.s_tmax = config.get("s_tmax")
+        self.s_tmin = config.get("s_tmin")   #10
+        self.s_tmax = config.get("s_tmax")   #250
         print(f"diffusion extractor s_tmin={self.s_tmin}, s_tmax={self.s_tmax}")
 
-        self.eta = config.get("eta", 0.0)
+        self.eta = config.get("eta", 0.0)   #1.0
         print(f"diffusion extractor ddim eta={self.eta}")
 
         self.guidance_scale = config.get("guidance_scale", -1)
@@ -147,13 +151,17 @@ class DiffusionExtractor(nn.Module):
     def set_cond(self, prompt, negative_prompt):
         print('prompt', prompt)
         print('negative_prmopt', negative_prompt)
-        with torch.no_grad():
+         #그라디언트 update x, CLIP tokenizer를 통해 텍스트 프롬프트를 embedding 벡터로 변환
+         # ex) prompt: "A cat" -> cond_prompt: [1, T, D]  //T: max token length, D: CLIP hidden dimension
+        with torch.no_grad():  
                 with torch.autocast("cuda"):
                     _, cond_prompt = get_tokens_embedding(self.clip_tokenizer, self.clip, self.device, prompt)
-                    _, uncond_prompt = get_tokens_embedding(self.clip_tokenizer, self.clip, self.device, negative_prompt)
+                    _, uncond_prompt = get_tokens_embedding(self.clip_tokenizer, self.clip, self.device, negative_prompt)  #embedding
+        # 임베딩을 batch 크기 수 만큼 복제하여 입력에 맞게 확장
+        #cond_prompt[1, T, D] => cond[B, T, D] / uncond[B, T, D]
         for batch_size in self.batch_list:
-            cond_tmp = cond_prompt.expand((batch_size, *cond_prompt.shape[1:]))
-            cond_tmp = cond_tmp.to(self.device)
+            cond_tmp = cond_prompt.expand((batch_size, *cond_prompt.shape[1:])) 
+            cond_tmp = cond_tmp.to(self.device)  
 
             uncond_tmp = uncond_prompt.expand((batch_size, *uncond_prompt.shape[1:]))
             uncond_tmp = uncond_tmp.to(self.device)
@@ -182,7 +190,7 @@ class DiffusionExtractor(nn.Module):
                 else:
                     raise NotImplementedError
                 
-    def to_image(self, latents):
+    def to_image(self, latents):     #latents -> Image로 변환
         latents = 1 / self.vae.config.scaling_factor * latents
         images = self.vae.decode(latents).sample
         images = (images / 2 + 0.5).clamp(0, 1)
@@ -199,12 +207,12 @@ class DiffusionExtractor(nn.Module):
                 latent,
                 self.unet,
                 self.scheduler,
-                run_inversion=False, 
+                run_inversion=False,    #generation
                 guidance_scale=guidance_scale,
                 do_pndm_steps=do_pndm_steps,
                 conditional=self.cond[self.batch_size],
                 unconditional=self.uncond[self.batch_size],
-                min_i=min_i,
+                min_i=min_i,  
                 max_i=max_i
             )
             # images = self.to_image(xs)
@@ -227,17 +235,18 @@ class DiffusionExtractor(nn.Module):
             # images[0].save('/home/xmuairmud/jyx/daily_scripts/inv_rst_sagf_05_pndm_test.png')
         return xs
 
+    #inversion 과정을 수행 후, latent trajectory 반환
     def run_inversion(self, latent, gt_semantic_seg=None, images=None, min_i=None, max_i=None, 
                       mode="norm", sag_scale=0.5):
         if mode == "norm":
             xs = generalized_steps(
-                latent, 
+                latent,   #x0 [B, C_latent, H, W]
                 self.unet, 
                 self.scheduler,
                 feature_extractor=self.feature_extractor,
                 depth_estimator=self.depth_estimator,
-                images=images,
-                gt_semantic_seg=gt_semantic_seg,
+                images=images, 
+                gt_semantic_seg=gt_semantic_seg,   
                 tclass_list=self.tclass_list,
                 run_inversion=True, 
                 guidance_scale=self.guidance_scale, 
@@ -265,7 +274,7 @@ class DiffusionExtractor(nn.Module):
                 eta=self.eta,
                 clip=self.clip,
                 clip_tokenizer=self.clip_tokenizer,
-            )
+            )  #xs: inversion 과정의 latent 시퀀스
         elif mode == "sag":
             xs = generalized_steps_sag(
                 latent, 
@@ -331,15 +340,15 @@ class DiffusionExtractor(nn.Module):
         return [Image.fromarray(image) for image in images]
 
     def forward(self, images=None, latents=None, guidance_scale=-1, preview_mode=False, stride_mode=False, gt_semantic_seg=None):
-        if images is None:
-            if latents is None:
+        if images is None:  
+            if latents is None:  #image(전처리된 이미지)와 latents 둘다 없는 경우, [B, Unet_channels, 64, 64] 형태로 무작위 latent 생성
                 latents = torch.randn((self.batch_size, self.unet.in_channels, 512 // 8, 512 // 8), device=self.device, generator=self.generator)
             if self.diffusion_mode == "generation":
                 if preview_mode:
                     extractor_fn = lambda latents: self.run_generation(latents, guidance_scale, max_i=self.end_timestep)
             elif self.diffusion_mode == "inversion":
                 raise NotImplementedError
-        else:
+        else:  #image를 VAE 인코더를 통해 latent로 인코딩
             # images = torch.nn.functional.interpolate(images, size=512, mode="bilinear")
             latents = self.vae.encode(images).latent_dist.sample(generator=None) * 0.18215
 
@@ -349,20 +358,40 @@ class DiffusionExtractor(nn.Module):
             # self.change_cond(caption_prompt, cond_type="cond", batch_size=batch_size_tmp)
 
             # print('jyxjyxjyx vae latents', torch.isnan(latents).float().sum())
-            if self.diffusion_mode == "inversion":
+            if self.diffusion_mode == "inversion":  #run_inversion 함수로 inversion 처리 -> xs 받아옴
                 extractor_fn = lambda latents: self.run_inversion(latents, gt_semantic_seg=gt_semantic_seg, images=images)
-            elif self.diffusion_mode == "inversion_sag":
+            elif self.diffusion_mode == "inversion_sag":   
                 extractor_fn = lambda latents: self.run_inversion(latents, mode='sag')
             elif self.diffusion_mode == "generation":
-                raise NotImplementedError
+                extractor_fn = lambda latents: self.run_generation(latents)
         
-        with torch.no_grad():
-            with torch.autocast("cuda"):
-                if self.diffusion_mode == "inv_then_rst":
-                    return self.get_feats_stride_inv_rst(latents)
+
+        with torch.autocast("cuda"):
+            if self.diffusion_mode == "inv_then_rst":
+                result = self.get_feats_stride_inv_rst(latents)
+            else:
+                if stride_mode:
+                    result = self.get_feats_stride(latents, extractor_fn)
                 else:
-                    if stride_mode:
-                        return self.get_feats_stride(latents, extractor_fn)
-                    else:
-                        return self.get_feats(latents, extractor_fn, preview_mode=preview_mode)
-                
+                    result = self.get_feats(latents, extractor_fn, preview_mode=preview_mode)
+            
+            return result
+
+'''
+inv_then_rst 모드는 inversion -> 재생성 과정을 통해 stride 기반 feature 수집
+stride_mode = True: get_feats_stride
+stride_mode = False: get_feats(ResNet 기반 추출)
+
+[diffusion_mode]
+1. generation: image = None -> latent 생성 후, generation
+2. inversion: image = True -> latent encoding 후, inversion
+3. inversion_sag: image = True -> latent encoding 후, inversion (SAG 방식)
+4. inv_then_rst: image = True -> inversion -> generation -> stride feature 추출
+'''
+
+'''
+get_feats: ResNet 기반 hidden feature collection
+get_feats_stride: ResNet + Cross-Attention 레벨에서 stride 기반 feature 수집
+get_feats_stride_inv_rst: inversion + 재생성 과정을 통해 stride feature 수집
+latents_to_image: VAE decoder를 통한 latent -> 이미지 변환
+'''

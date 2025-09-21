@@ -11,6 +11,8 @@ from .gta import GTADataset
 from .synthia import SynthiaDataset
 from .uda_dataset import UDADataset
 from .dg_dataset import DGDataset
+from .camvid import camvidDataset
+from .multi_scale_kd_dataset import MultiScaleKDDataset
 
 __all__ = [
     'CustomDataset',
@@ -27,4 +29,6 @@ __all__ = [
     'DGDataset',
     'ACDCDataset',
     'DarkZurichDataset',
+    'camvidDataset',
+    'MultiScaleKDDataset'
 ]

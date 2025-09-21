@@ -5,7 +5,6 @@ import json
 import logging
 from copy import deepcopy
 
-from experiments import generate_experiment_cfgs
 from mmcv import Config, get_logger
 from prettytable import PrettyTable
 
@@ -35,28 +34,14 @@ def count_parameters(model):
     return total_params
 
 
-# Run: python -m tools.param_count
+# Run: python -m tools.param_count/ CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/get_param_count.py
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--exp',
-        nargs='?',
-        type=int,
-        default=100,
-        help='Experiment id as defined in experiment.py',
-    )
-    args = parser.parse_args()
     get_logger('mmseg', log_level=logging.ERROR)
-    cfgs = generate_experiment_cfgs(args.exp)
-    for cfg in cfgs:
-        with open('configs/tmp_param.json', 'w') as f:
-            json.dump(cfg, f)
-        cfg = Config.fromfile('configs/tmp_param.json')
-
-        model = build_segmentor(deepcopy(cfg['model']))
-        # model.init_weights()
-        # count_parameters(model)
-        print(f'Encoder {cfg["name_encoder"]}:')
-        count_parameters(model.backbone)
-        print(f'Decoder {cfg["name_decoder"]}:')
-        count_parameters(model.decode_head)
+    cfg = Config.fromfile('/home/yeonwoo3/DIFF/work_dirs/student/fold1/segformer_288x288_b0/segformer_custom_288x288_fold1.py')
+    model = build_segmentor(cfg.model)
+    print('Backbone:')
+    count_parameters(model.backbone)
+    print('Decode Head:')
+    count_parameters(model.decode_head)
+    print('Total:')
+    count_parameters(model)

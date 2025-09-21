@@ -37,7 +37,13 @@ from archs.stable_diffusion.resnet import collect_dims_by_idx, collect_dims_by_s
 def load_models_stride(config_path, device='cuda'):
     config = OmegaConf.load(config_path)
     config = OmegaConf.to_container(config, resolve=True)
-    diffusion_extractor = DiffusionExtractor(config, device)
+    unet_ckpt_path = config.get('unet_ckpt_pth', None)
+    if unet_ckpt_path:
+        from diffusers import UNet2DConditionModel
+        unet = UNet2DConditionModel.from_pretrained(unet_ckpt_path)
+    else:
+        unet = None
+    diffusion_extractor = DiffusionExtractor(config, device, unet)
     # print(diffusion_extractor.idxs)
     dims_by_idx = collect_dims_by_idx(diffusion_extractor.unet, idxs_resnet=diffusion_extractor.idxs_resnet, idxs_ca=diffusion_extractor.idxs_ca)
     dims_by_stride = collect_dims_by_stride(diffusion_extractor.unet, idxs_resnet=diffusion_extractor.idxs_resnet, idxs_ca=diffusion_extractor.idxs_ca)

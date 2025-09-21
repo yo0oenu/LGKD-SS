@@ -119,17 +119,21 @@ def build_layer(in_channels, out_channels, type, **kwargs):
     else:
         raise NotImplementedError(type)
 
-
+'''
+1. backbone에서 나온 여러개의 feature [X4, X8, X16, X32]를 embedding하여 채널 수를  맞춤
+2. upsampling을 통해 가장 큰 피처맵의 크기로 통일
+3. fusion(채널방향) -> prediction
+'''
 @HEADS.register_module()
-class DAFormerHead(BaseDecodeHead):
+class DAFormerHead(BaseDecodeHead):   
 
     def __init__(self, **kwargs):
         super(DAFormerHead, self).__init__(
-            input_transform='multiple_select', **kwargs)
+            input_transform='multiple_select', **kwargs)  #백본에서 나온 여러 피처맵 중, self.in_index에 지정된 인덱스의 피처만 사용
 
         assert not self.align_corners
         decoder_params = kwargs['decoder_params']
-        embed_dims = decoder_params['embed_dims']
+        embed_dims = decoder_params['embed_dims']  #임베딩 차원
         if isinstance(embed_dims, int):
             embed_dims = [embed_dims] * len(self.in_index)
         embed_cfg = decoder_params['embed_cfg']
@@ -144,15 +148,15 @@ class DAFormerHead(BaseDecodeHead):
         self.embed_layers = {}
         for i, in_channels, embed_dim in zip(self.in_index, self.in_channels,
                                              embed_dims):
-            if i == self.in_index[-1]:
+            if i == self.in_index[-1]:   #가장 깊은 피처라면 embed_neck_cfg를 이용해 임베딩 레이어 생성
                 self.embed_layers[str(i)] = build_layer(
                     in_channels, embed_dim, **embed_neck_cfg)
             else:
                 self.embed_layers[str(i)] = build_layer(
-                    in_channels, embed_dim, **embed_cfg)
+                    in_channels, embed_dim, **embed_cfg)   #아니면 embed_cfg를 사용해 생성
         self.embed_layers = nn.ModuleDict(self.embed_layers)
 
-        self.fuse_layer = build_layer(
+        self.fuse_layer = build_layer(    #융합 레이어
             sum(embed_dims), self.channels, **fusion_cfg)
 
     def forward(self, inputs):

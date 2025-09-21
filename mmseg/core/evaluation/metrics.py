@@ -295,6 +295,15 @@ def eval_metrics(results,
             reduce_zero_label)
     all_acc = total_area_intersect.sum() / total_area_label.sum()
     ret_metrics = OrderedDict({'aAcc': all_acc})
+
+    iou = total_area_intersect / total_area_union
+    acc = total_area_intersect / total_area_label
+    
+    ret_metrics['mAcc'] = acc.mean()
+    freq = total_area_label / total_area_label.sum()
+    fwavacc = (freq * iou).sum()
+    ret_metrics['fwIoU'] = fwavacc
+    
     for metric in metrics:
         if metric == 'mIoU':
             iou = total_area_intersect / total_area_union

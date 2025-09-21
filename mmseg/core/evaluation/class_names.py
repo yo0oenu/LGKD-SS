@@ -2,6 +2,26 @@
 
 import mmcv
 
+def camvid_classes():
+    return [
+        'Building', 'Bicyclist', 'Fence', 'Pole', 'Pedestrian', 'Road',
+        'Sky', 'SignSymbol', 'Tree', 'Sidewalk', 'Car'
+    ]
+
+def CamVid_classes():
+    return [
+        'sky',
+        'building',    # 1
+        'pole',        # 2
+        'road',        # 3
+        'sidewalk',    # 4
+        'tree',        # 5
+        'signsymbol',  # 6
+        'fence',       # 7
+        'car',         # 8
+        'pedestrian',  # 9
+        'bicyclist'    # 10'
+    ]
 
 def cityscapes_classes():
     """Cityscapes class names for external use."""
@@ -52,6 +72,35 @@ def voc_classes():
         'tvmonitor'
     ]
 
+def CamVid_palette():
+    return  [
+        [128, 128, 128],  # 0: sky
+        [128, 0, 0],      # 1: building
+        [192, 192, 128],  # 2: pole
+        [128, 64, 128],   # 3: road
+        [0, 0, 192],      # 4: sidewalk
+        [128, 128, 0],    # 5: tree
+        [192, 128, 128],  # 6: signsymbol
+        [64, 64, 128],    # 7: fence
+        [64, 0, 128],     # 8: car
+        [64, 64, 0],      # 9: pedestrian
+        [0, 128, 192]     # 10: bicyclist
+    ]
+
+def camvid_palette():
+    return [
+        [128, 0, 0],      # 0: Building
+        [0, 128, 192],    # 1: Bicyclist
+        [64, 64, 128],    # 2: Fence
+        [192, 192, 128],  # 3: Pole
+        [64, 64, 0],      # 4: Pedestrian
+        [128, 64, 128],   # 5: Road
+        [128, 128, 128],  # 6: Sky
+        [192, 128, 128],  # 7: SignSymbol
+        [128, 128, 0],    # 8: Tree
+        [0, 0, 192],      # 9: Sidewalk
+        [64, 0, 128]      # 10: Car
+    ]
 
 def cityscapes_palette():
     """Cityscapes palette for external use."""
@@ -116,7 +165,9 @@ def voc_palette():
 dataset_aliases = {
     'cityscapes': ['cityscapes'],
     'ade': ['ade', 'ade20k'],
-    'voc': ['voc', 'pascal_voc', 'voc12', 'voc12aug']
+    'voc': ['voc', 'pascal_voc', 'voc12', 'voc12aug'],
+    'camvid': ['camvid'],
+    'CamVid': ['CamVid']
 }
 
 

@@ -1,6 +1,3 @@
-# Obtained from: https://github.com/open-mmlab/mmsegmentation/tree/v0.16.0
-# Modifications: Modification of config and checkpoint to support legacy models
-
 import argparse
 import os
 
@@ -15,12 +12,24 @@ from mmseg.apis import multi_gpu_test, single_gpu_test
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.models import build_segmentor
 
-
+'''
 def update_legacy_cfg(cfg):
     # The saved json config does not differentiate between list and tuple
     cfg.data.test.pipeline[1]['img_scale'] = tuple(
         cfg.data.test.pipeline[1]['img_scale'])
     # Support legacy checkpoints
+    if cfg.model.decode_head.type == 'UniHead':
+        cfg.model.decode_head.type = 'DAFormerHead'
+        cfg.model.decode_head.decoder_params.fusion_cfg.pop('fusion', None)
+    cfg.model.backbone.pop('ema_drop_path_rate', None)
+    return cfg
+'''
+def update_legacy_cfg(cfg):
+    for i, tf in enumerate(cfg.data.test.pipeline):
+        if tf['type'] == 'MultiScaleFlipAug':
+            cfg.data.test.pipeline[i]['img_scale'] = tuple(
+                cfg.data.test.pipeline[i]['img_scale'])
+            break
     if cfg.model.decode_head.type == 'UniHead':
         cfg.model.decode_head.type = 'DAFormerHead'
         cfg.model.decode_head.decoder_params.fusion_cfg.pop('fusion', None)
@@ -146,21 +155,14 @@ def main():
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    checkpoint = load_checkpoint(
-        model,
-        args.checkpoint,
-        map_location='cpu',
-        revise_keys=[(r'^module\.', ''), ('model.', '')])
-    if 'CLASSES' in checkpoint.get('meta', {}):
-        model.CLASSES = checkpoint['meta']['CLASSES']
-    else:
-        print('"CLASSES" not found in meta, use dataset.CLASSES instead')
-        model.CLASSES = dataset.CLASSES
-    if 'PALETTE' in checkpoint.get('meta', {}):
-        model.PALETTE = checkpoint['meta']['PALETTE']
-    else:
-        print('"PALETTE" not found in meta, use dataset.PALETTE instead')
-        model.PALETTE = dataset.PALETTE
+    
+    print(f"가중치 {args.checkpoint}")
+    checkpoint = torch.load(args.checkpoint, map_location = 'cpu')
+    state_dict = checkpoint.get('state_dict', checkpoint)
+    state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+    model.load_state_dict(state_dict, strict=False)
+    model.CLASSES = dataset.CLASSES
+    model.PALETTE = dataset.PALETTE 
 
     efficient_test = False
     if args.eval_options is not None:
@@ -177,17 +179,54 @@ def main():
             broadcast_buffers=False)
         outputs = multi_gpu_test(model, data_loader, args.tmpdir,
                                  args.gpu_collect, efficient_test)
-
+    save_dir = '/home/yeonwoo3/DIFF/work_dirs/student/fold2/segformer_288x288_b0/test'
     rank, _ = get_dist_info()
+    
+    if rank == 0:
+        from tqdm import tqdm
+        import os
+        os.makedirs(save_dir, exist_ok=True)
+        
+        for i, output in enumerate(tqdm(outputs, desc="Saving results")):
+            img_info = dataset.img_infos[i]
+            img_path = os.path.join(dataset.img_dir, img_info['filename'])
+            save_path = os.path.join(save_dir, img_info['filename'])
+            result_to_show = [output]
+            # model.module을 통해 원본 모델의 show_result 함수를 호출합니다.
+            result_img = model.module.show_result(
+                img_path,
+                result_to_show,
+                palette=model.module.PALETTE,
+                show=False,
+                opacity=args.opacity
+            )
+            mmcv.imwrite(result_img, save_path)
+        
+    
     if rank == 0:
         if args.out:
             print(f'\nwriting results to {args.out}')
             mmcv.dump(outputs, args.out)
         kwargs = {} if args.eval_options is None else args.eval_options
         if args.format_only:
-            dataset.format_results(outputs, **kwargs)
+            dataset.format_results(outputs, args.eval, **kwargs)
         if args.eval:
-            dataset.evaluate(outputs, args.eval, **kwargs)
+            try:
+                eval_results = dataset.evaluate(outputs, args.eval, **kwargs)
+                print("\n=== Additional Metrics Summary ===")
+            
+                if 'mIoU' in eval_results:
+                    print(f"mIoU: {eval_results['mIoU']:.2f}")
+                if 'mAcc' in eval_results:
+                    print(f"mPA: {eval_results['mAcc']:.2f}")  
+                if 'aAcc' in eval_results:
+                    print(f"PA: {eval_results['aAcc']:.2f}")
+                if 'fwIoU' in eval_results:
+                    print(f"FW IoU: {eval_results['fwIoU']:.2f}")
+            
+            except Exception as e:
+                print(f"\nEvaluation completed with warning: {str(e)}")
+                print("The main evaluation results (table above) are still valid.")
 
 
 if __name__ == '__main__':

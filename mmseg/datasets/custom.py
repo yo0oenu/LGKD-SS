@@ -365,6 +365,7 @@ class CustomDataset(Dataset):
         ret_metrics_class = OrderedDict({
             ret_metric: np.round(ret_metric_value * 100, 2)
             for ret_metric, ret_metric_value in ret_metrics.items()
+            if hasattr(ret_metric_value, 'ndim') and ret_metric_value.ndim == 1
         })
         ret_metrics_class.update({'Class': class_names})
         ret_metrics_class.move_to_end('Class', last=False)

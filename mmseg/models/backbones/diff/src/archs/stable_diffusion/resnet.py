@@ -1,17 +1,17 @@
 # Extract Cross Attention Map and Intermediate Feature from Diffusion Process
 # Implementation for DIFF for paper 'Diffusion Features to Bridge Domain Gap for Semantic Segmentation'
-# Based on HyperFeature
-# By Yuxiang Ji
-
+'''
+U-Net 중간 feature와 cross-attention map을 추출/저장/활용하기 위한 함수
+'''
 
 import torch
 from einops import rearrange, repeat
 
 
-def init_ca_resnet_func(
+def init_ca_resnet_func(  #U-Net의 resnet, cross-attention 모듈의 forward 함수 오버라이드
     unet,
-    save_hidden=False,
-    use_hidden=False,
+    save_hidden=False,   #True: 각 timestep별로 feature를 self.feats에 저장
+    use_hidden=False,    #저장된 feature를 불러와 사용
     reset=True,
     save_timestep=[],
     idxs_resnet=[(1, 0)],

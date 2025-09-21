@@ -40,7 +40,14 @@ class EncoderDecoder(BaseSegmentor):
                  test_cfg=None,
                  pretrained=None,
                  init_cfg=None,
-                 diff_train=True):
+                 diff_train=True,
+                 teacher_config=None,
+                 kd_temperature=4.0,
+                 kd_lamb=0.1,
+                 kd_max_v=1.0,
+                 task_weight=1.0,
+                 use_kd=False,
+                 freeze_teacher=False):
         super(EncoderDecoder, self).__init__(init_cfg)
         if pretrained is not None:
             assert backbone.get('pretrained') is None, \
@@ -66,6 +73,33 @@ class EncoderDecoder(BaseSegmentor):
 
         assert self.with_decode_head
 
+        #KD 관련
+        self.use_kd = use_kd
+        self.teacher_config = teacher_config
+        if self.use_kd and teacher_config is not None:
+            self.teacher = builder.build_segmentor(teacher_config)
+            self.kd_temperature = kd_temperature
+            self.kd_lamb = kd_lamb
+            self.kd_max_v = kd_max_v
+            self.task_weight = task_weight
+            
+            for param in self.teacher.parameters():
+                param.requires_grad = False
+            
+            # Teacher 모델과 모든 서브모듈을 강제로 eval 모드로 설정
+            self.teacher.eval()
+            for module in self.teacher.modules():
+                module.eval()
+            
+            # DIFF 모델도 강제로 eval 모드로 설정
+            if hasattr(self.teacher.backbone, 'diff_model'):
+                self.teacher.backbone.diff_model.eval()
+                for module in self.teacher.backbone.diff_model.modules():
+                    module.eval()
+            
+            self.teacher.to('cuda')
+
+            
     def _init_decode_head(self, decode_head):
         """Initialize ``decode_head``"""
         self.decode_head = builder.build_head(decode_head)
@@ -105,7 +139,11 @@ class EncoderDecoder(BaseSegmentor):
     def encode_decode(self, img, img_metas, upscale_pred=True, gt_semantic_seg=None):
         """Encode images with backbone and decode into a semantic segmentation
         map of the same size as input."""
-        x = self.extract_feat(img, gt_semantic_seg, file_name=img_metas[0]['filename'])
+        if img_metas and len(img_metas) > 0 and 'filename' in img_metas[0]:
+            file_name = img_metas[0]['filename']
+        else:
+            file_name = None
+        x = self.extract_feat(img, gt_semantic_seg, file_name=file_name)
         # x = self.extract_feat(img, gt_semantic_seg)
         out = self._decode_head_forward_test(x, img_metas)
         if upscale_pred:
@@ -214,6 +252,26 @@ class EncoderDecoder(BaseSegmentor):
         kl_loss = torch.clamp(kl_loss, min=-float('inf'), max=max_v)
         return {'consistency_loss': kl_loss}
     
+    def kd_kl_loss(self, student_logits, teacher_logits, mask=None, lamb=0.1, temperature=4.0, max_v=10.0):
+        assert student_logits.shape == teacher_logits.shape, \
+            f"Shape mismatch: student {student_logits.shape} vs teacher {teacher_logits.shape}"
+
+        B, C, H, W = student_logits.shape
+        student_logits = student_logits.permute(0, 2, 3, 1).reshape(-1, C)
+        teacher_logits = teacher_logits.permute(0, 2, 3, 1).reshape(-1, C)
+        mask = mask.reshape(-1)
+        
+        student_logits = student_logits[mask]
+        teacher_logits = teacher_logits[mask]
+        
+        student_probs = F.log_softmax(student_logits / temperature, dim=1)
+        teacher_probs = F.softmax(teacher_logits / temperature, dim=1)
+        
+        kl_loss = F.kl_div(student_probs, teacher_probs, reduction='batchmean', log_target=False) * lamb * temperature * temperature
+        kl_loss = torch.clamp(kl_loss, min=-float('inf'), max=max_v)
+        
+        return {'kd_loss': kl_loss}
+    
     def ce_loss(self, pred_logits, ref_logits, lamb=0.1):
         ref_target = ref_logits.argmax(dim=1)
         ce_loss = F.cross_entropy(pred_logits, ref_target, ignore_index=255)
@@ -254,13 +312,26 @@ class EncoderDecoder(BaseSegmentor):
     def forward_style(self, img, img_metas, **kwargs):
         return self.backbone.forward_features(img, return_style=True)
 
+    def forward(self, img=None, img_metas=None, return_loss=True, **kwargs):
+        if return_loss:
+            if self.use_kd and 'teacher_img' in kwargs and 'student_img' in kwargs:
+                return self.forward_train(**kwargs)
+            else:
+                return self.forward_train(img, img_metas, **kwargs)
+        else:
+            return self.forward_test(img, img_metas, **kwargs)
+
     def forward_train(self,
-                      img,
-                      img_metas,
-                      gt_semantic_seg,
+                      img=None,
+                      img_metas=None,
+                      gt_semantic_seg=None,
                       seg_weight=None,
                       return_feat=False,
                       return_logits=False,
+                      student_img=None,
+                      student_gt=None,
+                      teacher_img=None,
+                      teacher_gt=None,
                       ):
         """Forward function for training.
 
@@ -315,7 +386,58 @@ class EncoderDecoder(BaseSegmentor):
             
             losses.update(loss_decode_w_seg)
             losses.update(loss_decode_wo_seg)
+        
+        elif self.use_kd and self.teacher_config is not None:
+            losses = dict()
             
+            # Student forward pass
+            x = self.extract_feat(student_img, gt_semantic_seg=student_gt)
+            if return_feat:
+                losses['features'] = x
+            loss_decode_seg = self._decode_head_forward_train(x, img_metas, student_gt, seg_weight=None, return_logits=True, prefix='decode')
+            student_logits = loss_decode_seg['decode.logits']
+            
+            # Teacher forward pass
+            with torch.no_grad():
+                self.teacher.eval()
+                for param in self.teacher.parameters():
+                    param.requires_grad = False
+                for module in self.teacher.modules():
+                    module.eval()
+                    for param in module.parameters():
+                        param.requires_grad = False
+                if hasattr(self.teacher.backbone, 'diff_model'):
+                    self.teacher.backbone.diff_model.eval()
+                    for module in self.teacher.backbone.diff_model.modules():
+                        module.eval()
+                        for param in module.parameters():
+                            param.requires_grad = False
+                
+                teacher_logits = self.teacher.encode_decode(teacher_img, img_metas, gt_semantic_seg=None)
+            
+            # Interpolation
+            if student_logits.shape != teacher_logits.shape:
+                student_logits_up = F.interpolate(student_logits, size=teacher_logits.shape[-2:], mode='bilinear', align_corners=self.align_corners)
+            else: 
+                student_logits_up = student_logits
+            
+            # KD loss
+            if teacher_gt is not None:
+               mask = (teacher_gt != 255)
+            kd_loss = self.kd_kl_loss(
+                student_logits_up,
+                teacher_logits,
+                mask=mask,
+                lamb=self.kd_lamb,
+                temperature=self.kd_temperature,
+                max_v=self.kd_max_v
+            )
+            
+            # Loss combination
+            for k, v in loss_decode_seg.items():
+                loss_decode_seg[k] = v * self.task_weight
+            losses.update(kd_loss)
+            losses.update(loss_decode_seg)
 
         else:
             x = self.extract_feat(img)
