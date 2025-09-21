@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Diffusion Features to Bridge Domain Gap for Semantic Segmentation
 
 **by [Yuxiang Ji*](https://yux1angji.github.io/), Boyong He\*, [Chenyuan Qu](https://chenyuanqu.com/), Zhuoyue Tan, Chuan Qin, Liaoni Wu**
@@ -99,3 +100,6 @@ If you find our work useful in your research, please consider citing:
     primaryClass={cs.CV}
 }
 ```
+=======
+# IMCL_Project
+>>>>>>> origin/main
