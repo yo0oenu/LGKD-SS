@@ -1,4 +1,4 @@
-### IMRL_Project
+# IMRL_Project
 
 ## Setup Environment  [참고](https://github.com/Yux1angJi/DIFF)
 
@@ -27,11 +27,13 @@ Teacher: 1280x384 [download]()
 Student: 640x192  [download]()
 
 ## Prompt
-1. Label
-2. Sentence
-3. Bag of words
-4. Orthogonal concep
-    
+1. Label: 클래스 라벨을 그대로 프롬프트로 사용
+2. Sentence: 해당 클래스에 대해 설명하는 문장 단위 프롬프트
+   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the general sentence that describe each classes.
+4. Bag of words: 해당 클래스에 대해 설명하는 일반적인 단어 표현 4개와 라벨명 1개
+   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 general words that describe each class.
+5. Orthogonal concep:각 클래스에 대한 교유의 단어 표현 4개와 라벨명 1개
+   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 closest concept words that describe each class, which must be orthogonala to other classes.
 ## Training Config
 ### [Teacher](configs/Teacher) 
 - Camvid: input resolution [384, 384]
