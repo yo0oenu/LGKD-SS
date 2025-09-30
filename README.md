@@ -1,31 +1,6 @@
-<<<<<<< HEAD
-## Diffusion Features to Bridge Domain Gap for Semantic Segmentation
+### IMRL_Project
 
-**by [Yuxiang Ji*](https://yux1angji.github.io/), Boyong He\*, [Chenyuan Qu](https://chenyuanqu.com/), Zhuoyue Tan, Chuan Qin, Liaoni Wu**
-
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/diffusion-features-to-bridge-domain-gap-for/domain-generalization-on-gta5-to-cityscapes)](https://paperswithcode.com/sota/domain-generalization-on-gta5-to-cityscapes?p=diffusion-features-to-bridge-domain-gap-for)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/diffusion-features-to-bridge-domain-gap-for/domain-generalization-on-gta-to-avg)](https://paperswithcode.com/sota/domain-generalization-on-gta-to-avg?p=diffusion-features-to-bridge-domain-gap-for)
-
-This is the official repository for the paper ["Diffusion Features to Bridge Domain Gap for Semantic Segmentation"](https://arxiv.org/abs/2406.00777)
-
-
-## Overview
-
-Pre-trained diffusion models have demonstrated remarkable proficiency in synthesizing images across a wide range of scenarios with customizable prompts, indicating their effective capacity to capture universal features. 
-Motivated by this, our study delves into the utilization of the implicit knowledge embedded within diffusion models to address challenges in cross-domain semantic segmentation. 
-This paper investigates the approach that leverages the sampling and fusion techniques to harness the features of diffusion models efficiently. 
-We propose DIffusion Feature Fusion (DIFF) as a backbone use for extracting and integrating effective semantic representations through the diffusion process.
-By leveraging the strength of text-to-image generation capability, we introduce a new training framework designed to implicitly learn posterior knowledge from it.
-
-Relying on diffusion-based encoder, our approach improves
-the previous state-of-the-art performance by 2.7 mIoU for GTA→Cityscapes,
-by 4.98 mIoU for GTA→ACDC, by 11.69 mIoU for GTA→Dark Zurich.
-
-![intro](resources/pipeline.jpg)
-
-
-## Setup Environment
+## Setup Environment  [참고](https://github.com/Yux1angJi/DIFF)
 
 For this project, we used python 3.8.18. We recommend setting up a new virtual
 environment:
@@ -42,64 +17,45 @@ pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable
 pip install mmcv-full==1.3.7  # requires the other packages to be installed first
 ```
 
-Further, please download the Stable-Diffusion v2-1 weights from HuggingFace. 
-Please refer to the instruction at [Stable-Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1).
+## Dataset
+**Camvid** 
+Teacher: 512x384  [download]()
+Student: 384x288  [download]()
 
+**KITTI:** 
+Teacher: 1280x384 [download]()
+Student: 640x192  [download]()
 
-All experiments were executed on a NVIDIA RTX A6000.
-
-
-## Setup Datasets
-
-**Cityscapes:** Please, download leftImg8bit_trainvaltest.zip and
-gt_trainvaltest.zip from [here](https://www.cityscapes-dataset.com/downloads/)
-and extract them to `data/cityscapes`.
-
-**GTA:** Please, download all image and label packages from
-[here](https://download.visinf.tu-darmstadt.de/data/from_games/) and extract
-them to `data/gta`.
-
-More details of dataset preparation could be referred at [DAFormer](https://github.com/lhoyer/DAFormer).
-
+## Prompt
+1. Label
+2. Sentence
+3. Bag of words
+4. Orthogonal concep
+    
+## Training Config
+# [Teacher](configs/Teacher) 
+- Camvid: input resolution [384, 384]
+- Kitti: input resolution [384, 384]
+# [Student](configs/Student) 
+- KD 없이 student 학습
+- Camvid: input resolution [288, 288]
+- Kitti: input resolution [192, 192]
+- ImageNet Pre-trained 가중치 [download]()
+- "pretrained" 이름의 폴더를 만든 이후, 해당 폴더 안에 가중치를 넣어놓으시면 됩니다.
+# [KD](configs/KD) 
+- [Camvid] Teacher input size: 384x384 / Student input size: 192x192
+- [Kitti] Teacher input size: 384x384 / Student input size: 192x192
+- response 기반 KD Loss는 MSE와 KL-Divergence 두 개가 구현되어 있습니다.
+  [코드](mmseg/models/segmentors/encoder_decoder.py) 448번 줄에서 kd_mse_loss(mse)를 사용할 지, kd_kl_loss(kl-divergence)를 사용할 것인지 하드코딩 해야됩니다..
 
 ## Training
-
-To run a simple experiment on GTA→Cityscapes
-
+experiments.sh에 config 경로를 넣은 후, 아래 코드 실행
 ```shell
-python run_experiments.py --exp 50
+bash experiments.sh 
 ```
 
-More information about the available configuration and experiments, can be
-found in [diff_config.yaml](mmseg/models/backbones/diff/configs/diff_config.yaml).
-
-If you want to utilize DIFF module as a backbone for other tasks, you could simply copy the whole directory [mmseg/models/backbones/diff](mmseg/models/backbones/diff) and use `DIFFEncoder` in [here](mmseg/models/backbones/diff/src/models/diff.py).
 
 
-## Acknowledgements
-
-This project is based on the following open-source projects. We thank their
-authors for making the source code publically available.
-
-* [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
-* [DAFormer](https://github.com/lhoyer/DAFormer)
-* [Diffusion-HyperFeature](https://github.com/diffusion-hyperfeatures/diffusion_hyperfeatures)
-* [VPD](https://github.com/wl-zhao/VPD)
 
 
-## Citation
-If you find our work useful in your research, please consider citing:
 
-```
-@misc{ji2024diffusion,
-    title={Diffusion Features to Bridge Domain Gap for Semantic Segmentation},
-    author={Yuxiang Ji and Boyong He and Chenyuan Qu and Zhuoyue Tan and Chuan Qin and Liaoni Wu},
-    year={2024},
-    eprint={2406.00777},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
-}
-```
-=======
-# IMCL_Project
->>>>>>> origin/main
