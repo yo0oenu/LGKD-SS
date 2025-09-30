@@ -33,16 +33,16 @@ Student: 640x192  [download]()
 4. Orthogonal concep
     
 ## Training Config
-# [Teacher](configs/Teacher) 
+### [Teacher](configs/Teacher) 
 - Camvid: input resolution [384, 384]
 - Kitti: input resolution [384, 384]
-# [Student](configs/Student) 
+### [Student](configs/Student) 
 - KD 없이 student 학습
 - Camvid: input resolution [288, 288]
 - Kitti: input resolution [192, 192]
 - ImageNet Pre-trained 가중치 [download]()
 - "pretrained" 이름의 폴더를 만든 이후, 해당 폴더 안에 가중치를 넣어놓으시면 됩니다.
-# [KD](configs/KD) 
+### [KD](configs/KD) 
 - [Camvid] Teacher input size: 384x384 / Student input size: 192x192
 - [Kitti] Teacher input size: 384x384 / Student input size: 192x192
 - response 기반 KD Loss는 MSE와 KL-Divergence 두 개가 구현되어 있습니다.
