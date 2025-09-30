@@ -1,21 +1,21 @@
 
 _base_ = [
     '../../_base_/models/segformer.py',
-    '../../_base_/datasets/camvid_512x384_f1.py',
+    '../../_base_/datasets/kitti_640x192_f2.py',
     '../../_base_/default_runtime.py'
 ]
 
+
 model = dict(
     type='EncoderDecoder',
-    pretrained='pretrained/mit_b1.pth',
-    use_kd = False,
+    pretrained='pretrained/mit_b0.pth',
     diff_train = False,
     backbone=dict(
-        type='mit_b1',
+        type='mit_b0',
         style='pytorch'),
     decode_head=dict(
         type='SegFormerHead',
-        in_channels=[64, 128, 320, 512],
+        in_channels=[32, 64, 160, 256],
         in_index=[0, 1, 2, 3],
         channels=128,
         dropout_ratio=0.1,
@@ -26,6 +26,7 @@ model = dict(
     # model training and testing settings
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
+
 
 
 # 훈련 설정 - 500 epoch (356 데이터, 배치 4)
@@ -59,5 +60,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/kd_b1'
-#PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/512x384_p/segformer_custom_384x384_fold1.py
+work_dir = './work_dirs/student_kitti/fold2/segformer_192x192_b0'
+#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/384x288_p/segformer_custom_288x288_fold2.py

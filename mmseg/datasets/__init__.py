@@ -13,6 +13,7 @@ from .uda_dataset import UDADataset
 from .dg_dataset import DGDataset
 from .camvid import camvidDataset
 from .multi_scale_kd_dataset import MultiScaleKDDataset
+from .kitti import kittiDataset
 
 __all__ = [
     'CustomDataset',
@@ -30,5 +31,6 @@ __all__ = [
     'ACDCDataset',
     'DarkZurichDataset',
     'camvidDataset',
-    'MultiScaleKDDataset'
+    'MultiScaleKDDataset',
+    'kittiDataset'
 ]

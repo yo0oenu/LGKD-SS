@@ -1,21 +1,19 @@
-
 _base_ = [
     '../../_base_/models/segformer.py',
-    '../../_base_/datasets/camvid_512x384_f2.py',
+    '../../_base_/datasets/kitti_640x192_f1.py',
     '../../_base_/default_runtime.py'
 ]
 
-
 model = dict(
     type='EncoderDecoder',
-    pretrained='pretrained/mit_b1.pth',
+    pretrained='pretrained/mit_b0.pth',
     diff_train = False,
     backbone=dict(
-        type='mit_b1',
+        type='mit_b0',
         style='pytorch'),
     decode_head=dict(
         type='SegFormerHead',
-        in_channels=[64, 128, 320, 512],
+        in_channels=[32, 64, 160, 256],
         in_index=[0, 1, 2, 3],
         channels=128,
         dropout_ratio=0.1,
@@ -60,4 +58,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/segformer_384x384_fold2_no_padding'
+work_dir = './work_dirs/student_kitti/fold1/segformer_192x192_b0'
+#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/kitti_640x192_p/fold1.py

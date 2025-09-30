@@ -1,5 +1,5 @@
 experiments=(
-    "/home/yeonwoo3/DIFF/configs/KD/DIFF2Seg_512t384s_fold1.py"
+    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_fold2.py"
 )
 
 echo "Starting experiments..."
@@ -10,7 +10,7 @@ echo "Total experiments: ${#experiments[@]}"
 for exp in "${experiments[@]}"; do
     echo "Running experiment: ${exp}"
 
-    PYTHONPATH=$PYTHONPATH:$(pwd) python tools/train.py "${exp}"
+    PYTHONPATH=$PYTHONPATH:$(pwd) python tools/train.py "${exp}" 
 
     if [ $? -eq 0 ]; then
         echo "Successfully completed experiment: ${exp}"

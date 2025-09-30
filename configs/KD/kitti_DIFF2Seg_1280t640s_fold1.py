@@ -1,13 +1,13 @@
 _base_ = [
     '../_base_/models/kd_diff_segformer.py',
-    '../_base_/datasets/kd_camvid_512x384_f1.py', 
+    '../_base_/datasets/kd_kitti_1280x384_f1.py', 
     '../_base_/schedules/poly10warm.py',  
     '../_base_/default_runtime.py'
 ]
 
 
 # Teacher 체크포인트 경로 
-teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold1/512*384_bacbone_text_512unet_fold1_라벨/best_mIoU_iter_20000.pth'
+teacher_checkpoint = ''
 
 model = dict(
     # KD 파라미터 오버라이드
@@ -26,7 +26,7 @@ optimizer = dict(
     type='AdamW',
     lr=0.00006,
     betas=(0.9, 0.999),
-    weight_decay=0.01,
+    weight_decay=0.1,
     paramwise_cfg=dict(
         custom_keys={
             'decode_head': dict(lr_mult=10.0),
@@ -50,7 +50,7 @@ lr_config = dict(
 data = dict(
     samples_per_gpu=4,
     workers_per_gpu=4,
-    train=dict(multi_scale=False)
+    train=dict(multi_scale=True)
 )
 
 optimizer_config = dict()
@@ -63,8 +63,7 @@ checkpoint_config = dict(by_epoch=False, interval=40000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/KL_1.0_Uni_LabelTeacher/fold1'
+work_dir = './work_dirs/kd/'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
-#PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/DIFF2Seg_384t384s_fold1.py

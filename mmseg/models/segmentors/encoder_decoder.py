@@ -272,6 +272,17 @@ class EncoderDecoder(BaseSegmentor):
         
         return {'kd_loss': kl_loss}
     
+    def kd_mse_loss(self, student_logits, teacher_logits, mask=None, lamb=0.1):
+        assert student_logits.shape == teacher_logits.shape, \
+            f"Shape mismatch: student {student_logits.shape} vs teacher {teacher_logits.shape}"
+        
+        mask = mask.expand_as(student_logits)
+        student_logits = student_logits[mask]
+        teacher_logits = teacher_logits[mask]
+        
+        mse_loss = F.mse_loss(student_logits, teacher_logits)
+        return {'kd_loss': mse_loss*lamb}
+        
     def ce_loss(self, pred_logits, ref_logits, lamb=0.1):
         ref_target = ref_logits.argmax(dim=1)
         ce_loss = F.cross_entropy(pred_logits, ref_target, ignore_index=255)
@@ -424,6 +435,7 @@ class EncoderDecoder(BaseSegmentor):
             # KD loss
             if teacher_gt is not None:
                mask = (teacher_gt != 255)
+            '''
             kd_loss = self.kd_kl_loss(
                 student_logits_up,
                 teacher_logits,
@@ -431,6 +443,13 @@ class EncoderDecoder(BaseSegmentor):
                 lamb=self.kd_lamb,
                 temperature=self.kd_temperature,
                 max_v=self.kd_max_v
+            )
+            '''
+            kd_loss = self.kd_mse_loss(
+                student_logits_up,
+                teacher_logits,
+                mask=mask,
+                lamb=self.kd_lamb
             )
             
             # Loss combination

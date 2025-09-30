@@ -10,11 +10,11 @@ from tqdm import tqdm
 #PYTHONPATH=$(pwd):$PYTHONPATH python /home/yeonwoo3/DIFF/tools/camvid_test.py
 
 # 사용자 설정
-config_file = '/home/yeonwoo3/DIFF/work_dirs/512*384_bacbone_text_512unet_fold1_orthogonal/fold1_F.py' 
-checkpoint_file = '/home/yeonwoo3/DIFF/work_dirs/512*384_bacbone_text_512unet_fold1_orthogonal/best_mIoU_iter_24000.pth'
-img_dir = '/home/yeonwoo3/DATA/camvid/384x512_fold_p/fold1/images/val'  #
-gt_dir = '/home/yeonwoo3/DATA/camvid/384x512_fold_p/fold1/ann/val'  #
-save_dir = '/home/yeonwoo3/DIFF/work_dirs/test_real/orthogonal'
+config_file = '/home/yeonwoo3/DIFF/work_dirs/kd/KL_0.1_Uni_LabelTeacher/fold2/DIFF2Seg_Uni_fold2.py' 
+checkpoint_file = '/home/yeonwoo3/DIFF/work_dirs/kd/KL_0.1_Uni_LabelTeacher/fold2/best_mIoU_iter_35000.pth'
+img_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/images/val'  #
+gt_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/ann/val'  #
+save_dir = '/home/yeonwoo3/DIFF/work_dirs/kd/KL_0.1_Uni_LabelTeacher/fold2/test'
 
 os.makedirs(save_dir, exist_ok=True)
 

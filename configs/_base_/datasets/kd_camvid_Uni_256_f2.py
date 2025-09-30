@@ -1,8 +1,9 @@
 dataset_type = 'MultiScaleKDDataset'
-data_root = '/home/yeonwoo3/DATA/camvid/384x512_fold_p/fold1/'  
-data_root_val = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/'
+data_root = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/'
+data_root_val = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/'
 
-crop_size = (384, 384)  #teacher random_crop 사이즈(Input size)
+img_scale = (384, 288)
+crop_size = (256, 256) 
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], 
@@ -13,7 +14,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),  # GT 로딩 활성화
-    dict(type='Resize', img_scale=(512, 384), ratio_range=(0.8, 1.5), keep_ratio=True),
+    dict(type='Resize', img_scale=img_scale, ratio_range=(0.8, 1.5), keep_ratio=True),
     dict(type='RandomCrop', crop_size=crop_size),  # 384x384 정사각형 crop
     dict(type='PhotoMetricDistortion'),
     dict(type='RandomFlip', prob=0.5),
@@ -79,8 +80,8 @@ data = dict(
         base_dataset_cfg=base_dataset_cfg_train,
         train_pipeline=train_pipeline,
         test_pipeline=None,
-        student_resolution=(288, 288),  # 384x384 → 288x288 (비율 유지)
-        teacher_resolution=crop_size,  # Teacher 해상도
+        student_resolution=crop_size,  
+        teacher_resolution=crop_size,  
         multi_scale=False
     ),
     val=dict(

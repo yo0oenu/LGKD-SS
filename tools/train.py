@@ -144,6 +144,11 @@ def main(args):
         cfg, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
     
     # Teacher 체크포인트 로드 (KD 전용)
+    if hasattr(cfg, 'use_kd') and cfg.use_kd:
+        if not (hasattr(cfg, 'teacher_checkpoint') and cfg.teacher_checkpoint):
+            logger.error('Teacher checkpoint is required for KD training')
+            raise ValueError('Teacher checkpoint is required for KD training')
+    
     if hasattr(cfg, 'teacher_checkpoint') and cfg.teacher_checkpoint:
         logger.info(f'Loading teacher checkpoint from {cfg.teacher_checkpoint}')
         try:

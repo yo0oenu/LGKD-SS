@@ -89,12 +89,12 @@ label_map:
 #label_map:
 #  0: 'Building', 'Architecture', 'Facade', 'Structure', 'Windows'
 #  1: 'Bicyclist', 'Helmet', 'Pedals', 'Wheels', 'Cycling'
-#  2: Fence, Boundary, Pickets, Barrier, Perimeter
-#  3: Pole, Slender, Vertical, Cable, Metallic
+#  2: 'Fence', 'Boundary', 'Pickets', 'Barrier', 'Perimeter'
+#  3: 'Pole', 'Slender', 'Vertical', 'Cable', 'Metallic'
 #  4: Pedestrian, Crosswalk, Footsteps, Walker, Striding
-#  5: Road, Asphalt, Lane, Driveway, Trafficwa
-#  6: Sky, Atmosphere, Horizon, Clouds, Airspace
-#  7: SignSymbol, Traffic sign, Pictogram, Instruction, Regulation
-#  8: Tree, Foliage, Trunk, Branches, Canopy
-#  9: Sidewalk, Curb, Walkway, Pedway, Paving
-#  10: Car, Vehicle, Windshield, Engine, Parking
+#  5: 'Road', 'Asphalt', 'Lane', 'Driveway', 'Trafficwa'
+#  6: 'Sky', 'Atmosphere', 'Horizon', 'Clouds', 'Airspace'
+#  7: 'SignSymbol', 'Traffic sign', 'Pictogram', 'Instruction', 'Regulation'
+#  8: 'Tree', 'Foliage', 'Trunk', 'Branches', 'Canopy'
+#  9: 'Sidewalk', 'Curb', 'Walkway', 'Pedway', 'Paving'
+#  10: 'Car', 'Vehicle', 'Windshield', 'Engine', 'Parking'

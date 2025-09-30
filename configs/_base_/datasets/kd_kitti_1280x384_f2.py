@@ -1,6 +1,6 @@
 dataset_type = 'MultiScaleKDDataset'
-data_root = '/home/yeonwoo3/DATA/camvid/384x512_fold_p/fold1/'  
-data_root_val = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/'
+data_root = '/home/yeonwoo3/DATA/KITTI/1280x384_fold/fold2/'  
+data_root_val = '/home/yeonwoo3/DATA/KITTI/640x192_fold/fold2'
 
 crop_size = (384, 384)  #teacher random_crop 사이즈(Input size)
 
@@ -13,7 +13,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),  # GT 로딩 활성화
-    dict(type='Resize', img_scale=(512, 384), ratio_range=(0.8, 1.5), keep_ratio=True),
+    dict(type='Resize', img_scale=(1280, 384), ratio_range=(0.8, 1.2), keep_ratio=True),
     dict(type='RandomCrop', crop_size=crop_size),  # 384x384 정사각형 crop
     dict(type='PhotoMetricDistortion'),
     dict(type='RandomFlip', prob=0.5),
@@ -28,13 +28,13 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(384, 288),
+        img_scale=(640, 192),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
-            dict(type='Pad', size=(288, 384), pad_val=0, seg_pad_val=255),
+            dict(type='Pad', size=(192, 640), pad_val=0, seg_pad_val=255),
             dict(type='ImageToTensor', keys=['img']),
             dict(type='Collect', keys=['img']),
         ])
@@ -42,32 +42,32 @@ test_pipeline = [
 
 # Base dataset configs
 base_dataset_cfg_train = dict(
-    type='camvidDataset',
+    type='kittiDataset',
     data_root=data_root,
     img_dir='images/train',
-    ann_dir='ann/train',
+    ann_dir='gt/train',
     img_suffix='.png',
-    seg_map_suffix='_L.png',
+    seg_map_suffix='.png',
     pipeline = []
 )
 
 base_dataset_cfg_val = dict(
-    type='camvidDataset',
+    type='kittiDataset',
     data_root=data_root_val,
     img_dir='images/val',
-    ann_dir='ann/val',
+    ann_dir='gt/val',
     img_suffix='.png',
-    seg_map_suffix='_L.png',
+    seg_map_suffix='.png',
     pipeline = []
 )
 
 base_dataset_cfg_test = dict(
-    type='camvidDataset',
+    type='kittiDataset',
     data_root=data_root_val,
     img_dir='images/val',  # val과 test가 같은 폴더
-    ann_dir='ann/val',
+    ann_dir='gt/val',
     img_suffix='.png',
-    seg_map_suffix='_L.png'
+    seg_map_suffix='.png'
 )
 
 
@@ -79,26 +79,26 @@ data = dict(
         base_dataset_cfg=base_dataset_cfg_train,
         train_pipeline=train_pipeline,
         test_pipeline=None,
-        student_resolution=(288, 288),  # 384x384 → 288x288 (비율 유지)
+        student_resolution=(192, 192),  # 384x384 → 192x192 (비율 유지)
         teacher_resolution=crop_size,  # Teacher 해상도
         multi_scale=False
     ),
     val=dict(
-        type='camvidDataset',
+        type='kittiDataset',
         data_root=data_root_val,
         img_dir='images/val',
-        ann_dir='ann/val',
+        ann_dir='gt/val',
         img_suffix='.png',
-        seg_map_suffix='_L.png',
+        seg_map_suffix='.png',
         pipeline=test_pipeline
     ),
     test=dict(
-        type='camvidDataset',
+        type='kittiDataset',
         data_root=data_root_val,
         img_dir='images/val',
-        ann_dir='ann/val',
+        ann_dir='gt/val',
         img_suffix='.png',
-        seg_map_suffix='_L.png',
+        seg_map_suffix='.png',
         pipeline=test_pipeline
     )
 )
