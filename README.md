@@ -38,6 +38,7 @@ Student: 640x192  [download]()
 ### [Teacher](configs/Teacher) 
 - Camvid: input resolution [384, 384]
 - Kitti: input resolution [384, 384]
+- [Teacher backbone config](/home/yeonwoo3/DIFF/mmseg/models/backbones/diff/configs/diff_config.yaml)
 ### [Student](configs/Student) 
 - KD 없이 student 학습
 - Camvid: input resolution [288, 288]
