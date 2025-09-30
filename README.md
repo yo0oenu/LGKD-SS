@@ -23,8 +23,7 @@ Teacher: 512x384  [download](https://drive.google.com/uc?export=download&id=1_WG
 Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxPicvecOYFyAgmDWadz-3-RZOp6A33_)
 
 **KITTI:** 
-Teacher: 1280x384 [download]()
-Student: 640x192  [download]()
+[download](https://drive.google.com/uc?export=download&id=1z19HfHcolqCrMrxMWWMmp9nQLJLpIQCD)
 
 ## Prompt
 1. Label: 클래스 라벨을 그대로 프롬프트로 사용
