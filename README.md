@@ -19,8 +19,8 @@ pip install mmcv-full==1.3.7  # requires the other packages to be installed firs
 
 ## Dataset
 **Camvid** 
-Teacher: 512x384  [download]()
-Student: 384x288  [download]()
+Teacher: 512x384  [download](https://drive.google.com/uc?export=download&id=1_WGz38Zd2va4UrFnjiF1TbO96PkawQPI)
+Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxPicvecOYFyAgmDWadz-3-RZOp6A33_)
 
 **KITTI:** 
 Teacher: 1280x384 [download]()
@@ -44,7 +44,7 @@ Student: 640x192  [download]()
 - KD 없이 student 학습
 - Camvid: input resolution [288, 288]
 - Kitti: input resolution [192, 192]
-- ImageNet Pre-trained 가중치 [download]()
+- ImageNet Pre-trained 가중치 [download](https://drive.google.com/uc?export=download&id=1xPxDrs1k0ywO7Sz-H2A1pgtTGAWlFZkt)
 - "pretrained" 이름의 폴더를 만든 이후, 해당 폴더 안에 가중치를 넣어놓으시면 됩니다.
 ### [KD](configs/KD) 
 - [Camvid] Teacher input size: 384x384 / Student input size: 192x192
