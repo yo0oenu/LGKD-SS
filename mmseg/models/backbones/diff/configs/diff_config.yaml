@@ -98,3 +98,46 @@ label_map:
 #  8: 'Tree', 'Foliage', 'Trunk', 'Branches', 'Canopy'
 #  9: 'Sidewalk', 'Curb', 'Walkway', 'Pedway', 'Paving'
 #  10: 'Car', 'Vehicle', 'Windshield', 'Engine', 'Parking'
+
+
+# KITTI label_map
+# label_map:
+#   0: 'sky'
+#   1: 'building'
+#   2: 'road'
+#   3: 'sidewalk'
+#   4: 'fence'
+#   5: 'vegetation'
+#   6: 'pole'
+#   7: 'car'
+#   8: 'sign'
+#   9: 'pedestrian'
+#   10: 'cyclist'
+
+#   # KITTI label_map with descriptions
+# label_map:
+#   0: 'A clear blue sky above the urban landscape.'
+#   1: 'A building or architectural structure in the city environment.'
+#   2: 'A paved road surface for vehicles to travel on.'
+#   3: 'A sidewalk or footpath for pedestrians alongside the road.'
+#   4: 'A fence or barrier separating different areas or properties.'
+#   5: 'Vegetation including trees, bushes, and other plant life.'
+#   6: 'A vertical pole used for signs, lights or other street fixtures.'
+#   7: 'A car or automobile on the road or parked.'
+#   8: 'A traffic sign providing information or direction to road users.'
+#   9: 'A person walking in the urban environment.'
+#   10: 'A person riding a bicycle through the city.'
+
+# # KITTI label_map with keywords
+# label_map:
+#   0: 'sky, blue, clouds, atmosphere, heaven'
+#   1: 'building, structure, architecture, facade, construction'
+#   2: 'road, street, pathway, asphalt, lane'
+#   3: 'sidewalk, pavement, footpath, walkway, pedestrian path'
+#   4: 'fence, barrier, railing, enclosure, boundary'
+#   5: 'vegetation, tree, plant, foliage, greenery'
+#   6: 'pole, post, column, vertical support, street pole'
+#   7: 'car, vehicle, automobile, transportation, motor vehicle'
+#   8: 'sign, traffic sign, signpost, signage, information'
+#   9: 'pedestrian, person, walker, human, passerby'
+#   10: 'cyclist, bicycle rider, bike rider, bicyclist, biker'
