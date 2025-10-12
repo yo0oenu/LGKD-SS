@@ -1,11 +1,13 @@
 experiments=(
-    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_fold2.py"
+    "/home/yeonwoo3/DIFF/configs/Student/camvid_384x288_p/fold1.py"
+    "/home/yeonwoo3/DIFF/configs/Student/camvid_384x288_p/fold1 copy.py"
+    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_gram_fold1.py"
 )
 
 echo "Starting experiments..."
 echo "Total experiments: ${#experiments[@]}"
 
-#export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=1
 
 for exp in "${experiments[@]}"; do
     echo "Running experiment: ${exp}"

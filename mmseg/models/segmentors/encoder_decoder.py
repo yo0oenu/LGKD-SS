@@ -47,13 +47,18 @@ class EncoderDecoder(BaseSegmentor):
                  kd_max_v=1.0,
                  task_weight=1.0,
                  use_kd=False,
-                 freeze_teacher=False):
+                 freeze_teacher=False,
+                 kd_type='mse'):
         super(EncoderDecoder, self).__init__(init_cfg)
         if pretrained is not None:
             assert backbone.get('pretrained') is None, \
                 'both backbone and segmentor set pretrained weight'
-            backbone.pretrained = pretrained
+            backbone['pretrained'] = pretrained
+            #backbone.pretrained = pretrained
         self.backbone = builder.build_backbone(backbone)
+
+        if hasattr(self.backbone, 'init_weights'):
+            self.backbone.init_weights()
 
         self.diff_train = diff_train
         self.iter = 0
@@ -74,6 +79,7 @@ class EncoderDecoder(BaseSegmentor):
         assert self.with_decode_head
 
         #KD 관련
+        self.kd_type = kd_type  # 'kl', 'mse', 'gram'
         self.use_kd = use_kd
         self.teacher_config = teacher_config
         if self.use_kd and teacher_config is not None:
@@ -98,6 +104,19 @@ class EncoderDecoder(BaseSegmentor):
                     module.eval()
             
             self.teacher.to('cuda')
+            
+    def state_dict(self, destination=None, prefix='', keep_vars=False):
+        """Override state_dict to save only student weights during KD training"""
+        state_dict = super().state_dict(destination, prefix=prefix, keep_vars=keep_vars)
+        
+        if self.use_kd and hasattr(self, 'teacher'):
+            student_state_dict = {k: v for k, v in state_dict.items() 
+                                  if not k.startswith('teacher')}
+            removed_count = len(state_dict) - len(student_state_dict)
+            if removed_count > 0:
+                print(f"[KD] Saving only student checkpoint")
+            return student_state_dict
+        return state_dict
 
             
     def _init_decode_head(self, decode_head):
@@ -405,8 +424,27 @@ class EncoderDecoder(BaseSegmentor):
             x = self.extract_feat(student_img, gt_semantic_seg=student_gt)
             if return_feat:
                 losses['features'] = x
-            loss_decode_seg = self._decode_head_forward_train(x, img_metas, student_gt, seg_weight=None, return_logits=True, prefix='decode')
-            student_logits = loss_decode_seg['decode.logits']
+            
+            # Gram matrix KD
+            if self.kd_type == 'gram':
+                if hasattr(self.decode_head, 'forward'):
+                    student_output, student_features = self.decode_head.forward(x, return_features=True)
+                loss_decode_seg = self._decode_head_forward_train(
+                    x, img_metas, student_gt,
+                    seg_weight=None,
+                    return_logits=True,
+                    prefix='decode'
+                )
+                student_logits = loss_decode_seg['decode.logits']
+            else:
+                # Logit 기반 KD(KL, MSE)
+                loss_decode_seg = self._decode_head_forward_train(
+                    x, img_metas, student_gt,
+                    seg_weight=None,
+                    return_logits=True,
+                    prefix='decode'
+                )
+                student_logits = loss_decode_seg['decode.logits']
             
             # Teacher forward pass
             with torch.no_grad():
@@ -424,33 +462,68 @@ class EncoderDecoder(BaseSegmentor):
                         for param in module.parameters():
                             param.requires_grad = False
                 
-                teacher_logits = self.teacher.encode_decode(teacher_img, img_metas, gt_semantic_seg=None)
+                if self.kd_type == 'gram':
+                    #Teacher feature 추출
+                    teacher_x = self.teacher.extract_feat(teacher_img, gt_semantic_seg=None)
+                    teacher_output, teacher_features = self.teacher.decode_head.forward(
+                        teacher_x, return_features=True
+                    )
+                    teacher_logits = teacher_output
+                else:
+                    teacher_logits = self.teacher.encode_decode(teacher_img, img_metas, gt_semantic_seg=None)
             
-            # Interpolation
-            if student_logits.shape != teacher_logits.shape:
-                student_logits_up = F.interpolate(student_logits, size=teacher_logits.shape[-2:], mode='bilinear', align_corners=self.align_corners)
-            else: 
-                student_logits_up = student_logits
-            
-            # KD loss
+            # KD loss 계산 (type에 따라 분기)
             if teacher_gt is not None:
-               mask = (teacher_gt != 255)
-            '''
-            kd_loss = self.kd_kl_loss(
-                student_logits_up,
-                teacher_logits,
-                mask=mask,
-                lamb=self.kd_lamb,
-                temperature=self.kd_temperature,
-                max_v=self.kd_max_v
-            )
-            '''
-            kd_loss = self.kd_mse_loss(
-                student_logits_up,
-                teacher_logits,
-                mask=mask,
-                lamb=self.kd_lamb
-            )
+                mask = (teacher_gt != 255)
+            
+            if self.kd_type == 'kl':
+                # KL Divergence KD
+                if student_logits.shape != teacher_logits.shape:
+                    student_logits_up = F.interpolate(student_logits, size=teacher_logits.shape[-2:], mode='bilinear', align_corners=self.align_corners)
+                else:
+                    student_logits_up = student_logits
+                
+                kd_loss = self.kd_kl_loss(
+                    student_logits_up,
+                    teacher_logits,
+                    mask=mask,
+                    lamb=self.kd_lamb,
+                    temperature=self.kd_temperature,
+                    max_v=self.kd_max_v
+                )
+            elif self.kd_type == 'mse':
+                # MSE KD
+                if student_logits.shape != teacher_logits.shape:
+                    student_logits_up = F.interpolate(student_logits, size=teacher_logits.shape[-2:], mode='bilinear', align_corners=self.align_corners)
+                else:
+                    student_logits_up = student_logits
+                
+                kd_loss = self.kd_mse_loss(
+                    student_logits_up,
+                    teacher_logits,
+                    mask=mask,
+                    lamb=self.kd_lamb
+                )
+            
+            elif self.kd_type == 'gram':
+                from mmseg.models.losses.kd_loss import gram_matrix_loss
+                assert student_features.shape[1] == teacher_features.shape[1], \
+                    f"Channel mismatch for Gram Matrix KD! " \
+                    f"Student channels: {student_features.shape[1]}, " \
+                    f"Teacher channels: {teacher_features.shape[1]}. " \
+                    f"Both must have the same number of channels."
+                if student_features.shape[2:] != teacher_features.shape[2:]:
+                    student_features = F.interpolate(
+                    student_features,
+                    size=teacher_features.shape[2:],
+                    mode='bilinear',
+                    align_corners=self.align_corners
+                )
+                gram_loss = gram_matrix_loss(student_features, teacher_features)
+                kd_loss = {'kd_loss': gram_loss*self.kd_lamb}
+            
+            else:
+                raise ValueError(f"Unknown KD type: {self.kd_type}")
             
             # Loss combination
             for k, v in loss_decode_seg.items():

@@ -8,7 +8,7 @@ _base_ = [
 
 model = dict(
     type='EncoderDecoder',
-    pretrained='pretrained/mit_b0.pth',
+    pretrained=None,
     diff_train = False,
     backbone=dict(
         type='mit_b0',
@@ -60,5 +60,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/student/fold2/segformer_288x288_b0'
-#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/384x288_p/segformer_custom_288x288_fold2.py
+work_dir = './work_dirs/student/scratch/fold2'
+#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/384x288_p/fold2.py

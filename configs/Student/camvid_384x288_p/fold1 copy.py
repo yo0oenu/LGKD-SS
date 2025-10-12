@@ -6,7 +6,6 @@ _base_ = [
 
 model = dict(
     type='EncoderDecoder',
-    pretrained=None,
     diff_train = False,
     backbone=dict(
         type='mit_b0',
@@ -28,8 +27,8 @@ model = dict(
 
 
 # 훈련 설정 - 500 epoch (356 데이터, 배치 4)
-runner = dict(type='IterBasedRunner', max_iters=40000)  
-checkpoint_config = dict(by_epoch=False, interval=40000)
+runner = dict(type='IterBasedRunner', max_iters=20000)  
+checkpoint_config = dict(by_epoch=False, interval=20000)
 evaluation = dict(interval=1000, metric='mIoU', save_best='mIoU')  
 
 # 옵티마이저 및 학습률, 
@@ -58,5 +57,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/student/scratch/fold1'
+work_dir = './work_dirs/student/pre/fold1'
 #CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/camvid_384x288_p/fold1.py

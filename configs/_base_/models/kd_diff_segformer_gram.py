@@ -1,4 +1,3 @@
-
 teacher_config = dict(
     type='EncoderDecoder',
     pretrained=None,
@@ -49,13 +48,14 @@ model = dict(
         num_classes=11,
         norm_cfg=dict(type='BN', requires_grad=True),
         align_corners=False,
-        decoder_params=dict(embed_dim=256, conv_kernel_size=1),
+        decoder_params=dict(embed_dim=256, conv_kernel_size=1, use_gram_kd = True),
         loss_decode=dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)
     ),
     train_cfg=dict(),
     test_cfg=dict(mode='whole'),
     use_kd=True,
     teacher_config=teacher_config,
+    kd_type='gram',
     kd_lamb=1.0,
     kd_max_v=2.0,
     task_weight=1.0,

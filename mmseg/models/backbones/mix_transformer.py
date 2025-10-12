@@ -340,6 +340,7 @@ class MixVisionTransformer(BaseModule):
 
     def init_weights(self):
         logger = get_root_logger()
+        
         if self.pretrained is None:
             logger.info('Init mit from scratch.')
             for m in self.modules():

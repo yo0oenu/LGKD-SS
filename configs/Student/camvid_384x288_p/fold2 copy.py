@@ -1,12 +1,13 @@
+
 _base_ = [
     '../../_base_/models/segformer.py',
-    '../../_base_/datasets/camvid_384x288_f1.py',
+    '../../_base_/datasets/camvid_384x288_f2.py',
     '../../_base_/default_runtime.py'
 ]
 
+
 model = dict(
     type='EncoderDecoder',
-    pretrained=None,
     diff_train = False,
     backbone=dict(
         type='mit_b0',
@@ -28,11 +29,11 @@ model = dict(
 
 
 # 훈련 설정 - 500 epoch (356 데이터, 배치 4)
-runner = dict(type='IterBasedRunner', max_iters=40000)  
-checkpoint_config = dict(by_epoch=False, interval=40000)
+runner = dict(type='IterBasedRunner', max_iters=20000)  
+checkpoint_config = dict(by_epoch=False, interval=20000)
 evaluation = dict(interval=1000, metric='mIoU', save_best='mIoU')  
 
-# 옵티마이저 및 학습률, 
+# 옵티마이저 및 학습률
 optimizer = dict(type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01,
                  paramwise_cfg = dict(custom_keys = {
                      'pos_block': dict(decay_mult = 0.),
@@ -40,7 +41,7 @@ optimizer = dict(type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01
                      'head': dict(lr_mult = 10.)
                  }))
 
-#warmup = 3000
+
 # 학습률 스케줄러
 lr_config = dict(
     policy='poly',
@@ -58,5 +59,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/student/scratch/fold1'
-#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/camvid_384x288_p/fold1.py
+work_dir = './work_dirs/student/pre/fold2'
+#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/384x288_p/fold2.py
