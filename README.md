@@ -48,8 +48,6 @@ Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxP
 ### [KD](configs/KD) 
 - [Camvid] Teacher input size: 384x384 / Student input size: 192x192
 - [Kitti] Teacher input size: 384x384 / Student input size: 192x192
-- response 기반 KD Loss는 MSE와 KL-Divergence 두 개가 구현되어 있습니다.
-  [코드](mmseg/models/segmentors/encoder_decoder.py) 448번 줄에서 kd_mse_loss(mse)를 사용할 지, kd_kl_loss(kl-divergence)를 사용할 것인지 하드코딩 해야됩니다..
 
 ## Training
 experiments.sh에 config 경로를 넣은 후, 아래 코드 실행
