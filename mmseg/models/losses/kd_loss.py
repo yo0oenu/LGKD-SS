@@ -12,8 +12,12 @@ def compute_gram_matrix(features):
     """
     B, C, H, W = features.shape
     features = features.view(B, C, H*W)  # (B, C, H*W)
-    features = F.normalize(features, p=2, dim=2)
-    gram = torch.bmm(features, features.transpose(1, 2))  #(B, C, C)
+    gram = torch.bmm(features, features.transpose(1, 2))
+    gram = F.normalize(gram, p=2, dim=2)
+
+    
+    #features = F.normalize(features, p=2, dim=2)
+    #gram = torch.bmm(features, features.transpose(1, 2))  #(B, C, C)
     return gram
 
 def gram_matrix_loss(student_features, teacher_features, reduction='mean'):

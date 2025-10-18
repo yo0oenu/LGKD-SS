@@ -10,7 +10,7 @@ _base_ = [
 teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold2/512*384_bacbone_text_512unet_fold2_라벨/best_mIoU_iter_29000.pth'
 
 model = dict(
-    pretrained=None,
+    #pretrained=None,
     use_kd=True,        # KD
     kd_type='gram',
     kd_lamb=1.0,        # KD loss weight
@@ -27,7 +27,7 @@ optimizer = dict(
     type='AdamW',
     lr=0.00006,
     betas=(0.9, 0.999),
-    weight_decay=0.1,
+    weight_decay=0.01,
     paramwise_cfg=dict(
         custom_keys={
             'decode_head': dict(lr_mult=10.0),
@@ -58,13 +58,13 @@ optimizer_config = dict()
 
 # 체크포인트 및 평가 설정
 
-runner = dict(type='IterBasedRunner', max_iters=40000) 
+runner = dict(type='IterBasedRunner', max_iters=30000) 
 evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
-checkpoint_config = dict(by_epoch=False, interval=40000)
+checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/gram_1.0_Multi_LabelTeacher/fold2'
+work_dir = './work_dirs/kd/sim_pre_1.0_Multi_LabelTeacher/fold2'
 
 
 # GPU 설정 추가

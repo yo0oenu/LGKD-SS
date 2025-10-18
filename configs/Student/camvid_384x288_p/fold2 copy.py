@@ -9,6 +9,7 @@ _base_ = [
 model = dict(
     type='EncoderDecoder',
     diff_train = False,
+    pretrained='pretrained/mit_b0.pth',
     backbone=dict(
         type='mit_b0',
         style='pytorch'),
@@ -29,8 +30,8 @@ model = dict(
 
 
 # 훈련 설정 - 500 epoch (356 데이터, 배치 4)
-runner = dict(type='IterBasedRunner', max_iters=20000)  
-checkpoint_config = dict(by_epoch=False, interval=20000)
+runner = dict(type='IterBasedRunner', max_iters=30000)  
+checkpoint_config = dict(by_epoch=False, interval=30000)
 evaluation = dict(interval=1000, metric='mIoU', save_best='mIoU')  
 
 # 옵티마이저 및 학습률

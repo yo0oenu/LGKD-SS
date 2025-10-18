@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/kd_diff_segformer.py',
+    '../_base_/models/kd_diff_segformer_kl.py',
     '../_base_/datasets/kd_kitti_1280x384_f1.py', 
     '../_base_/schedules/poly10warm.py',  
     '../_base_/default_runtime.py'
@@ -7,11 +7,12 @@ _base_ = [
 
 
 # Teacher 체크포인트 경로 
-teacher_checkpoint = ''
+teacher_checkpoint = '/home/yeonwoo3/DIFF/pretrained/kitti/iter_30000.pth'
 
 model = dict(
-    # KD 파라미터 오버라이드
+    # KD 파라미터 오버라이드'
     use_kd=True,        # KD
+    kd_type='kl',
     kd_lamb=1.0,        # KD loss weight
     kd_max_v=10.0,       # KD loss max value
     task_weight=1.0,    # Task loss weight
@@ -63,7 +64,7 @@ checkpoint_config = dict(by_epoch=False, interval=40000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/'
+work_dir = './work_dirs/test'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)

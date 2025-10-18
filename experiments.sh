@@ -1,7 +1,6 @@
 experiments=(
-    "/home/yeonwoo3/DIFF/configs/Student/camvid_384x288_p/fold1.py"
-    "/home/yeonwoo3/DIFF/configs/Student/camvid_384x288_p/fold1 copy.py"
-    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_gram_fold1.py"
+    #"/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_gram_fold1.py"
+    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_gram_fold2.py"
 )
 
 echo "Starting experiments..."

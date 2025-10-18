@@ -62,15 +62,7 @@ class SegFormerHead(BaseDecodeHead):
         self.linear_pred = nn.Conv2d(
             embedding_dim, self.num_classes, kernel_size=1)
         
-        use_gram_kd = decoder_params.get('use_gram_kd', False)
-        if use_gram_kd:
-            self.kd_projection = nn.Sequential(
-                nn.Conv2d(embedding_dim, embedding_dim, kernel_size=1),
-                nn.BatchNorm2d(embedding_dim),
-                nn.ReLU(inplace=True)
-            )
-        else:
-            self.kd_projection = None
+        self.kd_projection = nn.Conv2d(self.num_classes, self.num_classes, kernel_size=1)
 
 
     def forward(self, inputs, return_features=False):
@@ -117,7 +109,9 @@ class SegFormerHead(BaseDecodeHead):
         else:
             x = _c
         x = self.linear_pred(x)   
-        features = x
+        
         if return_features:
+            features = self.kd_projection(x)
             return x, features
+            
         return x

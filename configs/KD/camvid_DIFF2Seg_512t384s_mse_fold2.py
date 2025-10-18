@@ -58,9 +58,9 @@ optimizer_config = dict()
 
 # 체크포인트 및 평가 설정
 
-runner = dict(type='IterBasedRunner', max_iters=20000) 
+runner = dict(type='IterBasedRunner', max_iters=30000) 
 evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
-checkpoint_config = dict(by_epoch=False, interval=20000)
+checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 # 작업 디렉토리
