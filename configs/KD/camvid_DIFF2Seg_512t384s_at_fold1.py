@@ -1,23 +1,22 @@
 _base_ = [
-    '../_base_/models/kd_diff_segformer_gram.py',
-    '../_base_/datasets/kd_camvid_512x384_f2.py', 
+    '../_base_/models/kd_diff_segformer_at.py',
+    '../_base_/datasets/kd_camvid_512x384_f1.py', 
     '../_base_/schedules/poly10warm.py',  
     '../_base_/default_runtime.py'
 ]
 
 
 # Teacher 체크포인트 경로 
-teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold2/512*384_bacbone_text_512unet_fold2_라벨/best_mIoU_iter_29000.pth'
+teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold1/512*384_bacbone_text_512unet_fold1_라벨/best_mIoU_iter_20000.pth'
 
 model = dict(
-    #pretrained=None,
+    # KD 파라미터 오버라이드'
     use_kd=True,        # KD
-    kd_type='gram',
-    kd_lamb=0.01,        # KD loss weight
-    kd_max_v=10.0,       # KD loss max value
+    kd_type='at',
+    at_p=2,
+    kd_lamb=10000.0,        # KD loss weight
     task_weight=1.0,    # Task loss weight
-    kd_temperature=4.0,  # KD temperature
-    diff_train=False,
+    diff_train=False
 )
 
 # DIFF backbone 관련 설정
@@ -64,9 +63,8 @@ checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/sim_pre_0.01_Multi_LabelTeacher/fold2'
-
+work_dir = './work_dirs/kd/at_1.0_Multi_LabelTeacher_pre_student/fold1'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
-#CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/DIFF2Seg_512t384s_fold2.py
+#PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/camvid_DIFF2Seg_512t384s_at_fold1.py

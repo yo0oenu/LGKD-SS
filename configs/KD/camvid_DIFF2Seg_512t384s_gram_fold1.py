@@ -14,7 +14,7 @@ model = dict(
     #pretrained=None,
     use_kd=True,        # KD
     kd_type='gram',
-    kd_lamb=1.0,        # KD loss weight
+    kd_lamb=0.01,        # KD loss weight
     kd_max_v=10.0,       # KD loss max value
     task_weight=1.0,    # Task loss weight
     kd_temperature=4.0,  # KD temperature
@@ -65,7 +65,7 @@ checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/sim_pre_1.0_Multi_LabelTeacher/fold1'
+work_dir = './work_dirs/kd/sim_pre_0.01_Multi_LabelTeacher/fold1'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)

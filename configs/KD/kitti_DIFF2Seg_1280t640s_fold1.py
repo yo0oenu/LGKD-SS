@@ -68,3 +68,4 @@ work_dir = './work_dirs/test'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
+#PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/kitti_DIFF2Seg_1280t640s_fold1.py

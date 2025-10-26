@@ -65,7 +65,7 @@ class SegFormerHead(BaseDecodeHead):
         self.kd_projection = nn.Conv2d(self.num_classes, self.num_classes, kernel_size=1)
 
 
-    def forward(self, inputs, return_features=False):
+    def forward(self, inputs, kd_mode=None):
         x = inputs
         n, _, h, w = x[-1].shape  
         # for f in x:
@@ -110,8 +110,7 @@ class SegFormerHead(BaseDecodeHead):
             x = _c
         x = self.linear_pred(x)   
         
-        if return_features:
+        if kd_mode == 'gram':
             features = self.kd_projection(x)
-            return x, features
-            
+            return x, features  
         return x

@@ -10,11 +10,11 @@ from tqdm import tqdm
 #PYTHONPATH=$(pwd):$PYTHONPATH python /home/yeonwoo3/DIFF/tools/camvid_test.py
 
 # 사용자 설정
-config_file = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_1.0_Multi_LabelTeacher/fold1/camvid_DIFF2Seg_512t384s_gram_fold1.py' 
-checkpoint_file = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_1.0_Multi_LabelTeacher/fold1/best_mIoU_iter_25000_student_only.pth'
-img_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/images/val'  #
-gt_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/ann/val'  #
-save_dir = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_1.0_Multi_LabelTeacher/fold1/test'
+config_file = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_0.05_Multi_LabelTeacher/fold2/camvid_DIFF2Seg_512t384s_gram_fold2.py' 
+checkpoint_file = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_0.05_Multi_LabelTeacher/fold2/best_mIoU_iter_30000.pth'
+img_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/images/val'  #
+gt_dir = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/ann/val'  #
+save_dir = '/home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_0.05_Multi_LabelTeacher/fold2/test'
 
 os.makedirs(save_dir, exist_ok=True)
 
