@@ -12,11 +12,11 @@ Usage:
     # 디렉토리 전체 변환
     python tools/student_weight_convert.py work_dirs/kd/xxx/
     
-    # 백업 없이 덮어쓰기 (주의!)
-    python tools/student_weight_convert.py work_dirs/kd/xxx/ --no-backup
+    # 백업 없이 덮어쓰기 
+    python tools/student_weight_convert.py /home/yeonwoo3/DIFF/work_dirs/kd/Sentence_teacher/mse_0.01/fold2/best_mIoU_iter_29000.pth --no-backup
     
     # 재귀적으로 모든 하위 디렉토리 변환
-    python tools/student_weight_convert.py work_dirs/kd/ --recursive
+    python tools/student_weight_convert.py /home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_0.1_Multi_LabelTeacher/ --recursive
 """
 
 import argparse

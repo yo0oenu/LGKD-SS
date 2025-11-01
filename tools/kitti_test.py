@@ -33,20 +33,22 @@ fold_configs = [
     }
 ]
 
-def camvid_palette():
+def kitti_palette():
     return [
-        [128, 0, 0],   #0: Building
-        [0, 128, 192], #1: Bicyclist
-        [64, 64, 128], #2: Fence
-        [192, 192, 128], #Pole
-        [64, 64, 0],     #Pedestrian
-        [128, 64, 128],  #Road
-        [128, 128, 128],  #Sky
-        [192, 128, 128],  #SignSymbol
-        [128, 128, 0],    #Tree
-        [0, 0, 192],      #Sidewalk
-        [64, 0, 128]      # 10: Car
-    ]
+        [128, 128, 128],   # 0: sky
+        [128, 0, 0],       # 1: building
+        [128, 64, 128],    # 2: road
+        [0, 0, 192],       # 3: sidewalk
+        [64, 64, 128],     # 4: fence
+        [128, 128, 0],     # 5: vegetation
+        [192, 192, 128],   # 6: pole
+        [64, 0, 128],      # 7 : car
+        [192, 128, 128],   # 8: sign
+        [64, 64, 0],       # 9: pedestrian
+        [0, 128, 192]      # 10: cyclist
+]
+
+
 
 # 각 fold별 결과 저장
 all_fold_metrics = []
@@ -84,9 +86,7 @@ for fold_config in fold_configs:
             for f in os.listdir(split_img_dir):
                 if f.endswith('.png'):
                     img_path = os.path.join(split_img_dir, f)
-                    base_name = os.path.splitext(f)[0]
-                    gt_fname = base_name + '_L.png'
-                    gt_path = os.path.join(split_gt_dir, gt_fname)
+                    gt_path = os.path.join(split_gt_dir, f)
                     img_list.append((img_path, gt_path, f))
     
     print(f"총 {len(img_list)}개")
@@ -108,7 +108,7 @@ for fold_config in fold_configs:
             # 시각화 저장
             if isinstance(result, list) and len(result) > 0:
                 pred_mask = np.array(result[0], dtype=np.uint8)
-                palette = np.array(camvid_palette(), dtype=np.uint8)
+                palette = np.array(kitti_palette(), dtype=np.uint8)
                 if pred_mask.max() >= len(palette):
                     pred_mask = np.clip(pred_mask, 0, len(palette)-1)
                 color_mask = palette[pred_mask]
