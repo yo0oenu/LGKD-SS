@@ -64,7 +64,7 @@ checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/kd/kl_0.01_Multi_LabelTeacher_pre_student/fold2'
+work_dir = './'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
