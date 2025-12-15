@@ -6,8 +6,7 @@ _base_ = [
 ]
 
 
-# Teacher 체크포인트 경로 
-teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold2/512*384_bacbone_text_512unet_fold2_라벨/best_mIoU_iter_29000.pth'
+teacher_checkpoint = '/home/yourpath/DIFF/work_dirs/Teacher/fold2/512*384_bacbone_text_512unet_fold2_label/best_mIoU_iter_29000.pth'
 
 model = dict(
     #pretrained=None,
@@ -20,7 +19,7 @@ model = dict(
     diff_train=False,
 )
 
-# DIFF backbone 관련 설정
+# DIFF backbone 
 norm_cfg = dict(type='BN', requires_grad=True)
 
 optimizer = dict(
@@ -37,7 +36,7 @@ optimizer = dict(
     )
 )
 
-# 학습률 스케줄러
+
 lr_config = dict(
     policy='poly',
     warmup='linear',
@@ -56,17 +55,14 @@ data = dict(
 
 optimizer_config = dict()
 
-# 체크포인트 및 평가 설정
 
 runner = dict(type='IterBasedRunner', max_iters=30000) 
 evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
 checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
-# 작업 디렉토리
 work_dir = './work_dirs/kd/sim_pre_0.01_Multi_LabelTeacher/fold2'
 
 
-# GPU 설정 추가
 gpu_ids = range(0, 1)
 #CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/DIFF2Seg_512t384s_fold2.py
