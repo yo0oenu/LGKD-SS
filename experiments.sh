@@ -1,6 +1,5 @@
 experiments=(
-    #"/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_at_fold1.py"
-    "/home/yeonwoo3/DIFF/configs/KD/camvid_DIFF2Seg_512t384s_at_fold2.py"
+    ""
 )
 
 echo "Starting experiments..."
