@@ -1,21 +1,3 @@
-#!/usr/bin/env python
-"""
-KD Checkpoint Converter:
-
-Usage:
-    # single file
-    python tools/student_weight_convert.py work_dirs/kd/xxx/iter_30000.pth
-    
-    # directory entire
-    python tools/student_weight_convert.py work_dirs/kd/xxx/
-    
-    # without backup
-    python tools/student_weight_convert.py /home/yourpath/DIFF/work_dirs/kd/Sentence_teacher/mse_0.01/fold2/best_mIoU_iter_29000.pth --no-backup
-    
-    # all recursive
-    python tools/student_weight_convert.py /home/yourpath/DIFF/work_dirs/kd/sim_pre_0.1_Multi_LabelTeacher/ --recursive
-"""
-
 import argparse
 import os
 import shutil
