@@ -1,6 +1,6 @@
 dataset_type = 'MultiScaleKDDataset'
-data_root = '/home/yeonwoo3/DATA/KITTI/1280x384_fold/fold1/'  
-data_root_val = '/home/yeonwoo3/DATA/KITTI/640x192_fold/fold1'
+data_root = '//'  
+data_root_val = '/'
 
 crop_size = (384, 384)  #teacher random_crop 사이즈(Input size)
 
