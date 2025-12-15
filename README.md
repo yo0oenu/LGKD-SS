@@ -1,6 +1,6 @@
 # IMRL_Project
 
-## Setup Environment  [참고](https://github.com/Yux1angJi/DIFF)
+## Setup Environment  [Reference](https://github.com/Yux1angJi/DIFF)
 
 For this project, we used python 3.8.18. We recommend setting up a new virtual
 environment:
@@ -26,13 +26,13 @@ Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxP
 [download](https://drive.google.com/uc?export=download&id=1z19HfHcolqCrMrxMWWMmp9nQLJLpIQCD)
 
 ## Prompt
-1. Label: 클래스 라벨을 그대로 프롬프트로 사용
-2. Sentence: 해당 클래스에 대해 설명하는 문장 단위 프롬프트
-   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the general sentence that describe each classes.
-4. Bag of words: 해당 클래스에 대해 설명하는 일반적인 단어 표현 4개와 라벨명 1개
-   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 general words that describe each class.
-5. Orthogonal concep:각 클래스에 대한 교유의 단어 표현 4개와 라벨명 1개
-   제작예시: All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 closest concept words that describe each class, which must be orthogonala to other classes.
+1. Label: Use the class label itself directly as the prompt.
+2. Sentence: Use a sentence-level prompt that describes each class.
+   (Example): All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the general sentence that describe each classes.
+4. Bag of words: Use 4 general descriptive words and 1 label name for each class.
+   (Example): All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 general words that describe each class.
+5. Orthogonal concep:Use 4 unique concept words and 1 label name for each class. The concept words must be orthogonal (distinct) from those of other classes.
+   (Example): All classes in an urban driving scene are "Building", "Bicyclist", "Fence"...... Tell me about the 5 closest concept words that describe each class, which must be orthogonala to other classes.
 ## Training Config
 ### [Teacher](configs/Teacher) 
 - Camvid: input resolution [384, 384]
@@ -40,20 +40,19 @@ Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxP
 - [Teacher backbone config](/home/yeonwoo3/DIFF/mmseg/models/backbones/diff/configs/diff_config.yaml)
    if use only Image, ->  do_mask_step: False 
 ### [Student](configs/Student) 
-- KD 없이 student 학습
+- Train the student model without knowledge distillation (KD)
 - Camvid: input resolution [288, 288]
 - Kitti: input resolution [192, 192]
-- ImageNet Pre-trained 가중치 [download](https://drive.google.com/uc?export=download&id=1Ociq6VZ9MECrCe-hld7C8dh2XgdzsV8y)
-- "pretrained" 이름의 폴더를 만든 이후, 해당 폴더 안에 가중치를 넣어놓으시면 됩니다.
+- ImageNet Pre-trained weights [download](https://drive.google.com/uc?export=download&id=1Ociq6VZ9MECrCe-hld7C8dh2XgdzsV8y)
+   Once you download the weights, create a folder named pretrained and place the weights inside it.
 ### [KD](configs/KD) 
 - [Camvid] Teacher input size: 384x384 / Student input size: 192x192
 - [Kitti] Teacher input size: 384x384 / Student input size: 192x192
 - kd_type = kl, mse, at, sp, gram 중 하나
 
 ## Training
-experiments.sh에 config 경로를 넣은 후, 아래 코드 실행
+After specifying the configuration paths in experiments.sh, run:
 ```shell
 bash experiments.sh 
 ```
-
 
