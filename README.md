@@ -48,7 +48,7 @@ Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxP
 ### [KD](configs/KD) 
 - [Camvid] Teacher input size: 384x384 / Student input size: 192x192
 - [Kitti] Teacher input size: 384x384 / Student input size: 192x192
-- kd_type = kl, mse, at, sp, gram 중 하나
+- kd_type can be one of the following: = kl, mse, at, sp, gram
 
 ## Training
 After specifying the configuration paths in experiments.sh, run:
