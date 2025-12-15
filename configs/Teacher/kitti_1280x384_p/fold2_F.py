@@ -32,7 +32,7 @@ runner = dict(type='IterBasedRunner', max_iters=30000)
 evaluation = dict(interval=1000, metric='mIoU', save_best='mIoU')
 checkpoint_config = dict(by_epoch=False, interval=30000)
 
-work_dir = './work_dirs/1280x384_kitty_fold2'     #work_dir 수정정
+work_dir = './'     #work_dir 수정정
 
 #PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/512x384_p/fold2_F.py
 #CUDA_VISIBLE_DEVICES=1
