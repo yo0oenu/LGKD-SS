@@ -7,7 +7,7 @@ _base_ = [
 
 
 # Teacher 
-teacher_checkpoint = '/home/yourpath/DIFF/work_dirs/Teacher/fold1/512*384_bacbone_text_512unet_fold1_label/best_mIoU_iter_20000.pth'
+teacher_checkpoint = '/'
 
 model = dict(
     # KD 
@@ -65,7 +65,7 @@ checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
 
-work_dir = './work_dirs/kd/sim_pre_0.01_Multi_LabelTeacher/fold1'
+work_dir = './'
 
 
 gpu_ids = range(0, 1)
