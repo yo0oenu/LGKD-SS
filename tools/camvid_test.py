@@ -7,28 +7,28 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 
-#PYTHONPATH=$(pwd):$PYTHONPATH python /home/yeonwoo3/DIFF/tools/camvid_test_2fold.py
+#PYTHONPATH=$(pwd):$PYTHONPATH python /home/yourpath/DIFF/tools/camvid_test_2fold.py
 
 fold_configs = [
     {
         'name': 'fold1_model_on_fold2_data',
         'train_fold': 'fold1',
         'test_fold': 'fold2',
-        'config_file': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/camvid_DIFF2Seg_512t384s_mse_fold1.py',
-        'checkpoint_file': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/best_mIoU_iter_23000_student_only.pth',
-        'base_img_dir': '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/images',
-        'base_gt_dir': '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/ann',
-        'save_dir': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/test'  #segmentation map
+        'config_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/camvid_DIFF2Seg_512t384s_mse_fold1.py',
+        'checkpoint_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/best_mIoU_iter_23000_student_only.pth',
+        'base_img_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold2/images',
+        'base_gt_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold2/ann',
+        'save_dir': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/test'  #segmentation map
     },
     {
         'name': 'fold2_model_on_fold1_data',
         'train_fold': 'fold2',
         'test_fold': 'fold1',
-        'config_file': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/camvid_DIFF2Seg_512t384s_mse_fold2.py',
-        'checkpoint_file': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/best_mIoU_iter_27000_student_only.pth',
-        'base_img_dir': '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/images',
-        'base_gt_dir': '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/ann',
-        'save_dir': '/home/yeonwoo3/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/test'
+        'config_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/camvid_DIFF2Seg_512t384s_mse_fold2.py',
+        'checkpoint_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/best_mIoU_iter_27000_student_only.pth',
+        'base_img_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold1/images',
+        'base_gt_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold1/ann',
+        'save_dir': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/test'
     }
 ]
 
@@ -55,8 +55,8 @@ all_fold_class_accs = []
 
 for fold_config in fold_configs:
     print("\n" + "="*80)
-    print(f"평가 시작: {fold_config['name']}")
-    print(f"학습 fold: {fold_config['train_fold']}, 평가 fold: {fold_config['test_fold']}")
+    print(f"eval start: {fold_config['name']}")
+    print(f"training fold: {fold_config['train_fold']}, eval fold: {fold_config['test_fold']}")
     print("="*80 + "\n")
     
     config_file = fold_config['config_file']
@@ -151,8 +151,7 @@ for fold_config in fold_configs:
             
             print(f"\n[{fold_config['name']}] result:")
             print(f"total eval images : {len(preds)}")
-            
-            # 결과 저장
+
             fold_result = {
                 'name': fold_config['name'],
                 'num_images': len(preds)
@@ -181,7 +180,7 @@ for fold_config in fold_configs:
                 all_fold_class_accs.append(metrics['Acc'])
                 
                 if hasattr(model, 'CLASSES') and model.CLASSES is not None:
-                    print("\n클래스별 IoU:")
+                    print("\nclass IoU:")
                     for i, (cls_iou, cls_acc) in enumerate(zip(metrics['IoU'], metrics['Acc'])):
                         if i < len(model.CLASSES):
                             print(f"{model.CLASSES[i]}: IoU={cls_iou*100:.2f}, Acc={cls_acc*100:.2f}")
@@ -199,13 +198,13 @@ if all_fold_metrics:
         avg_miou = np.mean(miou_values)
         print(f"avg mIoU: {avg_miou*100:.2f}%")
         print(f"  - fold1  (fold2 eval): {miou_values[0]*100:.2f}")
-        print(f"  - fold2 모델 (fold1 eval): {miou_values[1]*100:.2f}")
+        print(f"  - fold2  (fold1 eval): {miou_values[1]*100:.2f}")
     
  
     macc_values = [m['mAcc'] for m in all_fold_metrics if 'mAcc' in m]
     if macc_values:
         avg_macc = np.mean(macc_values)
-        print(f"\n평균 mPA: {avg_macc*100:.2f}%")
+        print(f"\navg mPA: {avg_macc*100:.2f}%")
         print(f"  - fold1  (fold2 eval): {macc_values[0]*100:.2f}")
         print(f"  - fold2  (fold1 eval): {macc_values[1]*100:.2f}")
     
@@ -213,7 +212,7 @@ if all_fold_metrics:
     aacc_values = [m['aAcc'] for m in all_fold_metrics if 'aAcc' in m]
     if aacc_values:
         avg_aacc = np.mean(aacc_values)
-        print(f"\n평균 aAcc: {avg_aacc*100:.2f}%")
+        print(f"\navg aAcc: {avg_aacc*100:.2f}%")
         print(f"  - fold1 (fold2 eval): {aacc_values[0]*100:.2f}")
         print(f"  - fold2 (fold1 eval): {aacc_values[1]*100:.2f}")
     
