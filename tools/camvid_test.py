@@ -9,7 +9,6 @@ from tqdm import tqdm
 
 #PYTHONPATH=$(pwd):$PYTHONPATH python /home/yeonwoo3/DIFF/tools/camvid_test_2fold.py
 
-# K-Fold 설정: [(학습fold, 평가fold, config, checkpoint), ...]
 fold_configs = [
     {
         'name': 'fold1_model_on_fold2_data',
@@ -48,12 +47,12 @@ def camvid_palette():
         [64, 0, 128]      # 10: Car
     ]
 
-# 각 fold별 결과 저장
+
 all_fold_metrics = []
 all_fold_class_ious = []
 all_fold_class_accs = []
 
-# 각 fold 평가
+
 for fold_config in fold_configs:
     print("\n" + "="*80)
     print(f"평가 시작: {fold_config['name']}")
@@ -68,14 +67,14 @@ for fold_config in fold_configs:
     
     os.makedirs(save_dir, exist_ok=True)
     
-    # 모델 및 파이프라인 초기화
+
     cfg = mmcv.Config.fromfile(config_file)
     print("--- test pipeline ---")
     print(cfg.data.test.pipeline)
     print("------------------------------------")
     model = init_segmentor(cfg, checkpoint_file, device='cuda:0')
     
-    # 이미지 리스트 수집
+
     img_list = []  
     for split in ['train', 'val']:
         split_img_dir = os.path.join(base_img_dir, split)
@@ -91,13 +90,13 @@ for fold_config in fold_configs:
     
     print(f"총 {len(img_list)}개")
     
-    # 직접 테스트 파이프라인 생성
+
     cfg.model.test_cfg.mode = 'whole'
     
-    # 예측 및 저장
+    
     results = []
     
-    for img_path, gt_path, fname in tqdm(img_list, desc=f"{fold_config['name']} 예측 중"):
+    for img_path, gt_path, fname in tqdm(img_list, desc=f"{fold_config['name']} predicting"):
         try:
             result = inference_segmentor(model, img_path)
             if isinstance(result, list) and len(result) > 0:
@@ -105,7 +104,7 @@ for fold_config in fold_configs:
             else:
                 results.append(None)
             
-            # 시각화 저장
+
             if isinstance(result, list) and len(result) > 0:
                 pred_mask = np.array(result[0], dtype=np.uint8)
                 palette = np.array(camvid_palette(), dtype=np.uint8)
@@ -118,13 +117,13 @@ for fold_config in fold_configs:
             print(f"Error processing {fname}: {e}")
             results.append(None)
     
-    # 평가
+ 
     if os.path.exists(base_gt_dir):
         from mmseg.core.evaluation import eval_metrics
         preds = []
         gts = []
         
-        for i, (img_path, gt_path, fname) in enumerate(tqdm(img_list, desc=f"{fold_config['name']} 평가 중")):
+        for i, (img_path, gt_path, fname) in enumerate(tqdm(img_list, desc=f"{fold_config['name']} evalutating")):
             if not os.path.exists(gt_path):
                 continue
             gt = cv2.imread(gt_path, cv2.IMREAD_UNCHANGED)
@@ -150,8 +149,8 @@ for fold_config in fold_configs:
             
             metrics = eval_metrics(preds, gts, num_classes=num_classes, ignore_index=255)
             
-            print(f"\n[{fold_config['name']}] 평가 결과:")
-            print(f"총 평가 이미지: {len(preds)}개")
+            print(f"\n[{fold_config['name']}] result:")
+            print(f"total eval images : {len(preds)}")
             
             # 결과 저장
             fold_result = {
@@ -177,7 +176,6 @@ for fold_config in fold_configs:
             
             all_fold_metrics.append(fold_result)
             
-            # 클래스별 IoU, Acc 저장
             if 'IoU' in metrics and 'Acc' in metrics:
                 all_fold_class_ious.append(metrics['IoU'])
                 all_fold_class_accs.append(metrics['Acc'])
@@ -188,47 +186,46 @@ for fold_config in fold_configs:
                         if i < len(model.CLASSES):
                             print(f"{model.CLASSES[i]}: IoU={cls_iou*100:.2f}, Acc={cls_acc*100:.2f}")
         else:
-            print(f"[{fold_config['name']}] 오류: 평가할 예측/GT 쌍이 없습니다.")
+            print(f"[{fold_config['name']}] error: no pred/gt pair to eval")
 
-# K-Fold 최종 평균 결과 출력
 print("\n" + "="*80)
-print("K-FOLD 교차 검증 최종 결과")
+print("K-FOLD final result")
 print("="*80 + "\n")
 
 if all_fold_metrics:
-    # mIoU 평균
+    
     miou_values = [m['mIoU'] for m in all_fold_metrics if 'mIoU' in m]
     if miou_values:
         avg_miou = np.mean(miou_values)
-        print(f"평균 mIoU: {avg_miou*100:.2f}%")
-        print(f"  - fold1 모델 (fold2 평가): {miou_values[0]*100:.2f}")
-        print(f"  - fold2 모델 (fold1 평가): {miou_values[1]*100:.2f}")
+        print(f"avg mIoU: {avg_miou*100:.2f}%")
+        print(f"  - fold1  (fold2 eval): {miou_values[0]*100:.2f}")
+        print(f"  - fold2 모델 (fold1 eval): {miou_values[1]*100:.2f}")
     
-    # mAcc 평균
+ 
     macc_values = [m['mAcc'] for m in all_fold_metrics if 'mAcc' in m]
     if macc_values:
         avg_macc = np.mean(macc_values)
         print(f"\n평균 mPA: {avg_macc*100:.2f}%")
-        print(f"  - fold1 모델 (fold2 평가): {macc_values[0]*100:.2f}")
-        print(f"  - fold2 모델 (fold1 평가): {macc_values[1]*100:.2f}")
+        print(f"  - fold1  (fold2 eval): {macc_values[0]*100:.2f}")
+        print(f"  - fold2  (fold1 eval): {macc_values[1]*100:.2f}")
     
-    # aAcc 평균
+ 
     aacc_values = [m['aAcc'] for m in all_fold_metrics if 'aAcc' in m]
     if aacc_values:
         avg_aacc = np.mean(aacc_values)
         print(f"\n평균 aAcc: {avg_aacc*100:.2f}%")
-        print(f"  - fold1 모델 (fold2 평가): {aacc_values[0]*100:.2f}")
-        print(f"  - fold2 모델 (fold1 평가): {aacc_values[1]*100:.2f}")
+        print(f"  - fold1 (fold2 eval): {aacc_values[0]*100:.2f}")
+        print(f"  - fold2 (fold1 eval): {aacc_values[1]*100:.2f}")
     
-    # 클래스별 평균 IoU
+  
     if all_fold_class_ious and hasattr(model, 'CLASSES') and model.CLASSES is not None:
         avg_class_ious = np.mean(all_fold_class_ious, axis=0)
         avg_class_accs = np.mean(all_fold_class_accs, axis=0)
-        print("\n클래스별 평균 IoU (K-Fold):")
+        print("\nclass avg IoU (K-Fold):")
         for i, (cls_iou, cls_acc) in enumerate(zip(avg_class_ious, avg_class_accs)):
             if i < len(model.CLASSES):
                 print(f"{model.CLASSES[i]}: IoU={cls_iou*100:.2f}, Acc={cls_acc*100:.2f}")
 
 print("\n" + "="*80)
-print("평가 완료!")
+print("done!")
 print("="*80)
