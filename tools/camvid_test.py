@@ -7,28 +7,28 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 
-#PYTHONPATH=$(pwd):$PYTHONPATH python /home/yourpath/DIFF/tools/camvid_test_2fold.py
+
 
 fold_configs = [
     {
         'name': 'fold1_model_on_fold2_data',
         'train_fold': 'fold1',
         'test_fold': 'fold2',
-        'config_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/camvid_DIFF2Seg_512t384s_mse_fold1.py',
-        'checkpoint_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/best_mIoU_iter_23000_student_only.pth',
-        'base_img_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold2/images',
-        'base_gt_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold2/ann',
-        'save_dir': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold1/test'  #segmentation map
+        'config_file': '',
+        'checkpoint_file': '',
+        'base_img_dir': '',
+        'base_gt_dir': '',
+        'save_dir': ''  #segmentation map
     },
     {
         'name': 'fold2_model_on_fold1_data',
         'train_fold': 'fold2',
         'test_fold': 'fold1',
-        'config_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/camvid_DIFF2Seg_512t384s_mse_fold2.py',
-        'checkpoint_file': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/best_mIoU_iter_27000_student_only.pth',
-        'base_img_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold1/images',
-        'base_gt_dir': '/home/yourpath/DATA/camvid/384x288_fold_p/fold1/ann',
-        'save_dir': '/home/yourpath/DIFF/work_dirs/kd/Label_Teacher/MSE/MSE_0.01_Multi_LabelTeacher_pre_student/fold2/test'
+        'config_file': '',
+        'checkpoint_file': '',
+        'base_img_dir': '',
+        'base_gt_dir': '',
+        'save_dir': ''
     }
 ]
 
