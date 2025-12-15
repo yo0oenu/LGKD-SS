@@ -156,7 +156,7 @@ def main():
     if fp16_cfg is not None:
         wrap_fp16_model(model)
     
-    print(f"가중치 {args.checkpoint}")
+    print(f"weight {args.checkpoint}")
     checkpoint = torch.load(args.checkpoint, map_location = 'cpu')
     state_dict = checkpoint.get('state_dict', checkpoint)
     state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
@@ -192,7 +192,7 @@ def main():
             img_path = os.path.join(dataset.img_dir, img_info['filename'])
             save_path = os.path.join(save_dir, img_info['filename'])
             result_to_show = [output]
-            # model.module을 통해 원본 모델의 show_result 함수를 호출합니다.
+
             result_img = model.module.show_result(
                 img_path,
                 result_to_show,
