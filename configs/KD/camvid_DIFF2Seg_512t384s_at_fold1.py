@@ -7,7 +7,7 @@ _base_ = [
 
 
 # Teacher path
-teacher_checkpoint = '/home/yourpath/DIFF/work_dirs/Teacher/fold1/512*384_bacbone_text_512unet_fold1_label/best_mIoU_iter_20000.pth'
+teacher_checkpoint = '/'
 
 model = dict(
     # KD param
@@ -58,7 +58,7 @@ evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
 checkpoint_config = dict(by_epoch=False, interval=30000)
 
 
-work_dir = './work_dirs/kd/at_1.0_Multi_LabelTeacher_pre_student/fold1'
+work_dir = './'
 
 gpu_ids = range(0, 1)
 #PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/KD/camvid_DIFF2Seg_512t384s_at_fold1.py
