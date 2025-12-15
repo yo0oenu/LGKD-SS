@@ -5,12 +5,10 @@ _base_ = [
     '../_base_/default_runtime.py'
 ]
 
-
-# Teacher 체크포인트 경로 
 teacher_checkpoint = ''
 
 model = dict(
-    # KD 파라미터 오버라이드
+    
     use_kd=True,        # KD
     kd_lamb=1.0,        # KD loss weight
     kd_max_v=10.0,       # KD loss max value
@@ -19,7 +17,7 @@ model = dict(
     diff_train=False
 )
 
-# DIFF backbone 관련 설정
+# DIFF backbone 
 norm_cfg = dict(type='BN', requires_grad=True)
 
 optimizer = dict(
@@ -36,7 +34,7 @@ optimizer = dict(
     )
 )
 
-# 학습률 스케줄러
+
 lr_config = dict(
     policy='poly',
     warmup='linear',
@@ -55,14 +53,13 @@ data = dict(
 
 optimizer_config = dict()
 
-# 체크포인트 및 평가 설정
+
 
 runner = dict(type='IterBasedRunner', max_iters=40000) 
 evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
 checkpoint_config = dict(by_epoch=False, interval=40000)
 
 
-# 작업 디렉토리
 work_dir = './work_dirs/kd/'
 
 # GPU 설정 추가
