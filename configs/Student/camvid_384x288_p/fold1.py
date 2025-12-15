@@ -56,5 +56,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/student/scratch/fold1'
+work_dir = './'
 #CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/camvid_384x288_p/fold1.py
