@@ -1,5 +1,5 @@
 dataset_type = 'camvidDataset'
-data_root = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/'
+data_root = '//'
 # 데이터 전처리 파이프라인
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], 
