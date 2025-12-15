@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 """
-KD Checkpoint Converter: Teacher weights 제거 및 Student weights만 저장
-
-기존 KD checkpoint를 student-only checkpoint로 변환합니다.
-원본은 _backup.pth로 백업되고, 원본 파일명에 student weight만 저장됩니다.
+KD Checkpoint Converter:
 
 Usage:
-    # 단일 파일 변환
+    # single file
     python tools/student_weight_convert.py work_dirs/kd/xxx/iter_30000.pth
     
-    # 디렉토리 전체 변환
+    # directory entire
     python tools/student_weight_convert.py work_dirs/kd/xxx/
     
-    # 백업 없이 덮어쓰기 
+    # without backup
     python tools/student_weight_convert.py /home/yeonwoo3/DIFF/work_dirs/kd/Sentence_teacher/mse_0.01/fold2/best_mIoU_iter_29000.pth --no-backup
     
-    # 재귀적으로 모든 하위 디렉토리 변환
+    # all recursive
     python tools/student_weight_convert.py /home/yeonwoo3/DIFF/work_dirs/kd/sim_pre_0.1_Multi_LabelTeacher/ --recursive
 """
 
@@ -29,12 +26,11 @@ from tqdm import tqdm
 
 def convert_to_student_only(ckpt_path, backup=True, verbose=True):
     """
-    KD checkpoint를 student-only로 변환
     
     Args:
-        ckpt_path (str): checkpoint 파일 경로
-        backup (bool): 원본을 _backup.pth로 백업할지 여부
-        verbose (bool): 상세 정보 출력 여부
+        ckpt_path (str): checkpoint
+        backup (bool)
+        verbose (bool)
     
     Returns:
         tuple: (success, original_size_mb, new_size_mb)
@@ -45,27 +41,27 @@ def convert_to_student_only(ckpt_path, backup=True, verbose=True):
         print(f" File not found: {ckpt_path}")
         return False, 0, 0
     
-    # 이미 변환된 파일인지 확인
+
     if '_backup' in ckpt_path.name or '_student' in ckpt_path.name:
         if verbose:
             print(f" Skipping (backup/student file): {ckpt_path.name}")
         return False, 0, 0
     
     try:
-        # 원본 크기 확인
+
         original_size = os.path.getsize(ckpt_path) / (1024 ** 2)
         
-        # Checkpoint 로드
+
         if verbose:
             print(f"\n Loading: {ckpt_path.name}")
         checkpoint = torch.load(ckpt_path, map_location='cpu')
         
-        # State dict 확인
+
         if 'state_dict' not in checkpoint:
             print(f" No 'state_dict' found in {ckpt_path.name}")
             return False, original_size, 0
         
-        # Teacher weights 찾기
+ 
         original_state = checkpoint['state_dict']
         teacher_keys = [k for k in original_state.keys() 
                        if 'teacher' in k.lower()]
@@ -75,13 +71,13 @@ def convert_to_student_only(ckpt_path, backup=True, verbose=True):
                 print(f"✓ Already student-only (no teacher weights found)")
             return False, original_size, original_size
         
-        # Student weights만 필터링
+
         student_state = {k: v for k, v in original_state.items() 
                         if k not in teacher_keys}
         
         checkpoint['state_dict'] = student_state
         
-        # 백업 생성
+
         if backup:
             backup_path = ckpt_path.with_name(ckpt_path.stem + '_backup.pth')
             if backup_path.exists():
@@ -92,10 +88,10 @@ def convert_to_student_only(ckpt_path, backup=True, verbose=True):
                 if verbose:
                     print(f"Backup created: {backup_path.name}")
         
-        # Student-only checkpoint 저장 (원본 덮어쓰기)
+
         torch.save(checkpoint, ckpt_path)
         
-        # 새 크기 확인
+
         new_size = os.path.getsize(ckpt_path) / (1024 ** 2)
         saved = original_size - new_size
         
@@ -114,14 +110,12 @@ def convert_to_student_only(ckpt_path, backup=True, verbose=True):
 
 
 def convert_directory(directory, backup=True, recursive=False, pattern='*.pth'):
-    """
-    디렉토리 내 모든 checkpoint 변환
-    
+    """    
     Args:
-        directory (str): 디렉토리 경로
-        backup (bool): 백업 생성 여부
-        recursive (bool): 하위 디렉토리도 탐색할지 여부
-        pattern (str): 파일 패턴
+        directory (str)
+        backup (bool)
+        recursive (bool)
+        pattern (str)
     """
     directory = Path(directory)
     
@@ -129,13 +123,11 @@ def convert_directory(directory, backup=True, recursive=False, pattern='*.pth'):
         print(f"Directory not found: {directory}")
         return
     
-    # 파일 찾기
     if recursive:
         pth_files = list(directory.rglob(pattern))
     else:
         pth_files = list(directory.glob(pattern))
     
-    # 백업/student 파일 제외
     pth_files = [f for f in pth_files 
                  if '_backup' not in f.name and '_student' not in f.name]
     
@@ -159,10 +151,8 @@ def convert_directory(directory, backup=True, recursive=False, pattern='*.pth'):
             success_count += 1
             total_original += orig_size
             total_new += new_size
-            # Progress bar와 함께 간단한 정보만 출력
             tqdm.write(f"✓ {pth_file.name}: {orig_size:.1f}MB → {new_size:.1f}MB")
     
-    # 최종 요약
     print(f"\n{'='*70}")
     print(f"Conversion Summary:")
     print(f"  - Total converted: {success_count}/{len(pth_files)} files")
@@ -214,10 +204,8 @@ def main():
     backup = not args.no_backup
     
     if path.is_file():
-        # 단일 파일 변환
         convert_to_student_only(path, backup=backup, verbose=True)
     elif path.is_dir():
-        # 디렉토리 변환
         convert_directory(path, backup=backup, recursive=args.recursive, 
                          pattern=args.pattern)
     else:
