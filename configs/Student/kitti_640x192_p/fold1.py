@@ -27,12 +27,11 @@ model = dict(
 
 
 
-# 훈련 설정 - 500 epoch (356 데이터, 배치 4)
+# 500 epoch (356 data, batch 4)
 runner = dict(type='IterBasedRunner', max_iters=40000)  
 checkpoint_config = dict(by_epoch=False, interval=40000)
 evaluation = dict(interval=1000, metric='mIoU', save_best='mIoU')  
 
-# 옵티마이저 및 학습률
 optimizer = dict(type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01,
                  paramwise_cfg = dict(custom_keys = {
                      'pos_block': dict(decay_mult = 0.),
@@ -40,8 +39,6 @@ optimizer = dict(type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01
                      'head': dict(lr_mult = 10.)
                  }))
 
-
-# 학습률 스케줄러
 lr_config = dict(
     policy='poly',
     warmup='linear',
@@ -52,7 +49,7 @@ lr_config = dict(
     by_epoch=False
 )
 optimizer_config = dict() 
-# 데이터 설정 - batch_size 4
+# batch_size 4
 data = dict(
     samples_per_gpu=4,  # batch size
     workers_per_gpu=4
