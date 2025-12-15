@@ -7,7 +7,7 @@ _base_ = [
 
 
 # Teacher 체크포인트 경로 
-teacher_checkpoint = '/home/yeonwoo3/DIFF/pretrained/kitti/iter_30000.pth'
+teacher_checkpoint = '/'
 
 model = dict(
     # KD 파라미터 오버라이드'
@@ -64,7 +64,7 @@ checkpoint_config = dict(by_epoch=False, interval=40000)
 
 
 # 작업 디렉토리
-work_dir = './work_dirs/test'
+work_dir = './'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
