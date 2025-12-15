@@ -127,10 +127,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-'''
-PYTHONPATH=$(pwd):$PYTHONPATH python tools/get_flops.py \
-    work_dirs/student/fold1/segformer_224x224_b1/segformer_custom_224x224_fold1.py \
-    --shape 256 320
-'''
