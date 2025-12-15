@@ -1,5 +1,5 @@
 dataset_type = 'MultiScaleKDDataset'
-data_root = '//'    #UniScale:  /home/yeonwoo3/DATA/camvid/384x288_fold_p/fold1/
+data_root = '//'    #UniScale:  //
 data_root_val = '//'
 
 img_scale = (384, 288)
