@@ -55,5 +55,5 @@ data = dict(
     workers_per_gpu=4
 )
 
-work_dir = './work_dirs/student_kitti/fold1/segformer_192x192_b0'
+work_dir = './'
 #CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/train.py configs/Student/kitti_640x192_p/fold1.py
