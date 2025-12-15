@@ -1,6 +1,6 @@
 dataset_type = 'MultiScaleKDDataset'
-data_root = '/home/yeonwoo3/DATA/camvid/384x512_fold_p/fold2/'
-data_root_val = '/home/yeonwoo3/DATA/camvid/384x288_fold_p/fold2/'
+data_root = '//'
+data_root_val = '//'
 
 crop_size = (384, 384)
 
