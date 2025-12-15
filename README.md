@@ -1,6 +1,6 @@
 # IMRL_Project
 
-## Setup Environment  [Reference](https://github.com/Yux1angJi/DIFF)
+## Setup Environment  ([Reference](https://github.com/Yux1angJi/DIFF))
 
 For this project, we used python 3.8.18. We recommend setting up a new virtual
 environment:
