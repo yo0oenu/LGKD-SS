@@ -45,7 +45,7 @@ Student: 384x288  [download](https://drive.google.com/uc?export=download&id=1bxP
 - ImageNet Pre-trained weights [download](https://drive.google.com/uc?export=download&id=1Ociq6VZ9MECrCe-hld7C8dh2XgdzsV8y)
    Once you download the weights, create a folder named pretrained and place the weights inside it.
 ### [KD](configs/KD) 
-- [Camvid] Teacher input size: 384x384 / Student input size: 192x192
+- [Camvid] Teacher input size: 384x384 / Student input size: 288x288
 - [Kitti] Teacher input size: 384x384 / Student input size: 192x192
 - kd_type can be one of the following: = kl, mse, at, sp, gram
 
