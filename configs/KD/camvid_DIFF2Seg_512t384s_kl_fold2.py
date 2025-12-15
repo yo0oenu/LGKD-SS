@@ -7,7 +7,7 @@ _base_ = [
 
 
 # Teacher 체크포인트 경로 
-teacher_checkpoint = '/home/yeonwoo3/DIFF/work_dirs/Teacher/fold2/512*384_bacbone_text_512unet_fold2_라벨/best_mIoU_iter_29000.pth'
+teacher_checkpoint = '/'
 
 model = dict(
     # KD 파라미터 오버라이드
