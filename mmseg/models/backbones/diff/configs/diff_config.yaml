@@ -10,9 +10,9 @@ projection_dim: [2048, 2048, 1024, 512]
 projection_dim_x4: 256
 
 # Change for your sdv2-1 repo
-model_id: "/home/yeonwoo3/model/stable_diffusion_512/"  
+model_id: "/dataset/stable_diffusion_512/"  
 # Unet finetuned path
-unet_ckpt_pth: "/home/yeonwoo3/model/stable_diffusion_512/unet"
+unet_ckpt_pth: "/dataset/stable_diffusion_51/unet"
 
 # As default
 aggregation_type: "direct_aggregation"
