@@ -60,7 +60,7 @@ evaluation = dict(interval=1000, metric='mIoU', save_best = 'mIoU')
 checkpoint_config = dict(by_epoch=False, interval=40000)
 
 
-work_dir = './work_dirs/kd/'
+work_dir = './'
 
 # GPU 설정 추가
 gpu_ids = range(0, 1)
