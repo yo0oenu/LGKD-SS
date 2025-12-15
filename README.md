@@ -1,7 +1,6 @@
-# IMRL_Project
+# Role of Language-guided Teacher in Knowledge Distillation for Semantic Segmentation on Driving Scene in Limited Field of View(LGKD-SS)
 
-## Setup Environment  ([Reference](https://github.com/Yux1angJi/DIFF))
-
+## Setup Environment  
 For this project, we used python 3.8.18. We recommend setting up a new virtual
 environment:
 
@@ -55,4 +54,11 @@ After specifying the configuration paths in experiments.sh, run:
 ```shell
 bash experiments.sh 
 ```
+
+## Acknowledgements
+
+This project is built upon the codebase of
+[DIFF](https://github.com/Yux1angJi/DIFF).
+We sincerely thank the authors for releasing their implementation.
+
 
