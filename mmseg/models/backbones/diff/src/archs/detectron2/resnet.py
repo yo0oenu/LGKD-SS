@@ -108,7 +108,7 @@ class GroupNormWithStability(nn.Module):
 
         # print(f'jyxjyxjyx GN mean:{torch.mean(mean).item()} {torch.any(torch.isnan(mean))} {torch.any(torch.isinf(mean))}, var:{torch.mean(var).item()} {torch.any(torch.isnan(mean))} {torch.any(torch.isinf(mean))}')
         if torch.any(torch.isnan(mean)):
-            torch.save(x, '/home/xmuairmud/jyx/HRDA_exp/error_x.pt')
+            torch.save(x, '/)
 
         # 归一化输入张量
         x = (x - mean) / torch.sqrt(var + self.eps)
