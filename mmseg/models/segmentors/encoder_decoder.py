@@ -717,12 +717,6 @@ class EncoderDecoder(BaseSegmentor):
     def simple_test(self, img, img_meta, rescale=True):
         """Simple test with single image."""
         seg_logit = self.inference(img, img_meta, rescale)
-
-        ########### For logit save
-        # print('jyxjyxjyx logit save')
-        # file_name = img_meta[0]['filename'].split('/')[-1].replace('_leftImg8bit.png', '.pt')
-        # torch.save(seg_logit.cpu(), f'/home/xmuairmud/jyx/HRDA/save_attn/logit_ori/{file_name}')
-
         if hasattr(self.decode_head, 'debug_output_attention') and \
                 self.decode_head.debug_output_attention:
             seg_pred = seg_logit[:, 0]
@@ -733,65 +727,7 @@ class EncoderDecoder(BaseSegmentor):
             seg_pred = seg_pred.unsqueeze(0)
             return seg_pred
 
-        
-        ############ For DIFT Mask
-        # print('jyxjyxjyx', seg_pred.shape)
-        # print(seg_pred)
-        # seg_pred = seg_pred[:, None, :, :]
-        # seg_logit = self.inference(img, img_meta, rescale, seg_pred)
-        # seg_pred = seg_logit.argmax(dim=1)
-        ############
-        ############ For threshold Mask
-        # threshold = 0.0
-        # prob = torch.max(seg_logit, dim=1)[0]
-        # # print('jyxjyxjyx', seg_logit.shape, seg_pred.shape)
-        # pseudo_label = torch.where(prob > threshold, seg_pred, torch.full_like(seg_pred, 255))
-        # print(f"prob: {prob.max()}")
-        # # print(f"prob: {seg_logit.max()}")
-        # print(f"psuedo_label: {(pseudo_label!=255).sum()}/{pseudo_label.shape[1]*pseudo_label.shape[2]}")
-        # # print('jyxjyxjyx', pseudo_label.shape)
-        # seg_logit = self.inference(img, img_meta, rescale, pseudo_label)
-        # seg_pred = seg_logit.argmax(dim=1)
-        ############
-
         seg_pred = seg_pred.cpu().numpy()
-
-        ############# Visualization
-        # print('jyxjyx visualization!!!')
-        # colors = np.array([
-        #     [128, 64,128],
-        #     [244, 35,232],
-        #     [ 70, 70, 70],
-        #     [102,102,156],
-        #     [190,153,153],
-        #     [153,153,153],
-        #     [250,170, 30],
-        #     [220,220,  0],
-        #     [107,142, 35],
-        #     [152,251,152],
-        #     [ 70,130,180],
-        #     [220, 20, 60],
-        #     [255,  0,  0],
-        #     [  0,  0,142],
-        #     [  0,  0, 70],
-        #     [  0, 60,100],
-        #     [  0, 80,100],
-        #     [  0,  0,230],
-        #     [119, 11, 32],
-        # ])
-        # vis_pred = seg_pred[0, ...]
-        
-        # color_image = colors[vis_pred]
-        # color_image_pil = Image.fromarray(color_image.astype('uint8'), 'RGB')
-        # file_name = img_meta[0]['filename'].split('/')[-1].replace('_rgb_anon', '')
-        # # file_name = img_meta[0]['filename'].split('/')[-1].replace('_leftImg8bit', '')
-        # # color_image_pil.save(f'/home/xmuairmud/data/mm2024/vis/DIFF/mv/mv_{file_name}')
-        # color_image_pil.save(f'/home/xmuairmud/jyx/daily_scripts/18025_seg_wo_ref.png')
-        # # file_name = img_meta[0]['filename'].split('/')[-1].replace('_leftImg8bit', '_predict')
-        # # color_image_pil.save(f'/home/xmuairmud/jyx/HRDA/save_attn/logit_ori/{file_name}')
-        # print(type(img_meta))
-
-        # unravel batch dim
         seg_pred = list(seg_pred)
         return seg_pred
 
