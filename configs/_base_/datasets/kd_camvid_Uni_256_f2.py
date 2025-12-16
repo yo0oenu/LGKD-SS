@@ -13,13 +13,13 @@ img_norm_cfg = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations'),  # GT 로딩 활성화
+    dict(type='LoadAnnotations'),  
     dict(type='Resize', img_scale=img_scale, ratio_range=(0.8, 1.5), keep_ratio=True),
-    dict(type='RandomCrop', crop_size=crop_size),  # 384x384 정사각형 crop
+    dict(type='RandomCrop', crop_size=crop_size), 
     dict(type='PhotoMetricDistortion'),
     dict(type='RandomFlip', prob=0.5),
     dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255),  # 384x384 정사각형
+    dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255),  
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_semantic_seg']),  
 ]
@@ -65,7 +65,7 @@ base_dataset_cfg_val = dict(
 base_dataset_cfg_test = dict(
     type='camvidDataset',
     data_root=data_root_val,
-    img_dir='images/val',  # val과 test가 같은 폴더
+    img_dir='images/val',  
     ann_dir='ann/val',
     img_suffix='.png',
     seg_map_suffix='_L.png'
