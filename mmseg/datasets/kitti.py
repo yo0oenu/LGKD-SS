@@ -13,7 +13,7 @@ from .custom import CustomDataset
 class kittiDataset(CustomDataset):
     CLASSES = (
         'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 
-        'pole', 'car', 'sign', 'pedestrian', 'cyclist'
+        'pole', 'car', 'sign', 'pedestrian', 'bicyclist'
     )
 
     PALETTE = [
@@ -27,7 +27,7 @@ class kittiDataset(CustomDataset):
         [64, 0, 128],      # 7 : car
         [192, 128, 128],   # 8: sign
         [64, 64, 0],       # 9: pedestrian
-        [0, 128, 192]      # 10: cyclist
+        [0, 128, 192]      # 10: bicyclist
 ]
 
     def results2img(self, results, imgfile_prefix, to_label_id=False):
