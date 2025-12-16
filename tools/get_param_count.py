@@ -37,7 +37,7 @@ def count_parameters(model):
 # Run: python -m tools.param_count/ CUDA_VISIBLE_DEVICES=1 PYTHONPATH=$(pwd):$PYTHONPATH python tools/get_param_count.py
 if __name__ == '__main__':
     get_logger('mmseg', log_level=logging.ERROR)
-    cfg = Config.fromfile('/home/yeonwoo3/DIFF/work_dirs/student/fold1/segformer_288x288_b0/segformer_custom_288x288_fold1.py')
+    cfg = Config.fromfile('')
     model = build_segmentor(cfg.model)
     print('Backbone:')
     count_parameters(model.backbone)
