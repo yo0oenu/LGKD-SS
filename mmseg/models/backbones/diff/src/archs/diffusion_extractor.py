@@ -215,8 +215,6 @@ class DiffusionExtractor(nn.Module):
                 min_i=min_i,  
                 max_i=max_i
             )
-            # images = self.to_image(xs)
-            # images[0].save('/home/xmuairmud/jyx/daily_scripts/inv_rst_pndmh_test.png')
         elif mode == "sag":
             xs = generalized_steps_sag(
                 latent,
@@ -231,8 +229,7 @@ class DiffusionExtractor(nn.Module):
                 min_i=min_i,
                 max_i=max_i
             )
-            # images = self.to_image(xs)
-            # images[0].save('/home/xmuairmud/jyx/daily_scripts/inv_rst_sagf_05_pndm_test.png')
+
         return xs
 
     #inversion 과정을 수행 후, latent trajectory 반환
