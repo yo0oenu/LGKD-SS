@@ -1,4 +1,4 @@
-# Role of Language-guided Teacher in Knowledge Distillation for Semantic Segmentation on Driving Scene in Limited Field of View(LGKD-SS)
+# Role of Language-Guidance in Knowledge Distillation for Semantic Segmentation Under Limited Field-Of-View Autonomous Driving(LGKD-SS)
 
 ## Setup Environment  
 For this project, we used python 3.8.18. We recommend setting up a new virtual
