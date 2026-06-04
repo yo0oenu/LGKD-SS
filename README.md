@@ -1,7 +1,6 @@
 # Role of Language-Guidance in Knowledge Distillation for Semantic Segmentation Under Limited Field-Of-View Autonomous Driving(LGKD-SS)
 # 2026 WACV on LLVM-AD Workshop.
-
-[Accepted Paper]: https://openaccess.thecvf.com/content/WACV2026W/LLVM-AD/papers/Shin_Role_of_Language-Guidance_in_Knowledge_Distillation_for_Semantic_Segmentation_Under_WACVW_2026_paper.pdf
+ [Paper](https://openaccess.thecvf.com/content/WACV2026W/LLVM-AD/papers/Shin_Role_of_Language-Guidance_in_Knowledge_Distillation_for_Semantic_Segmentation_Under_WACVW_2026_paper.pdf)
 
 ## Setup Environment  
 For this project, we used python 3.8.18. We recommend setting up a new virtual
